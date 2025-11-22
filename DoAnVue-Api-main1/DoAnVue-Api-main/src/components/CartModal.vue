@@ -33,7 +33,7 @@
           <span class="cart-total-value">{{ formatPrice(cartStore.finalTotal) }}</span>
         </div>
 
-        <!-- 👇 thêm hiển thị giảm giá nếu có -->
+        <!-- thêm hiển thị giảm giá nếu có -->
         <div v-if="cartStore.discount > 0" class="cart-discount">
           <span>Giảm giá:</span>
           <span class="cart-discount-value">-{{ formatPrice(cartStore.discount) }}</span>
