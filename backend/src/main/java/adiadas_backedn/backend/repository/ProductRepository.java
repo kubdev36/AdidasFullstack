@@ -42,4 +42,7 @@ public interface ProductRepository extends JpaRepository<Product, String> {
     // THÊM: Query riêng để lấy videos của sản phẩm
     @Query("SELECT p FROM Product p LEFT JOIN FETCH p.videos WHERE p.id = :id")
     Optional<Product> findByIdWithVideos(@Param("id") String id);
+
+    @Query(value = "SELECT * FROM products ORDER BY created_at DESC LIMIT 4", nativeQuery = true)
+    List<Product> findTop4NewestProductsNative();
 }

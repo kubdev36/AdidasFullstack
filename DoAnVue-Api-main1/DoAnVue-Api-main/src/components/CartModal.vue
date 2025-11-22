@@ -20,25 +20,61 @@
               <button @click="increaseQty(item)" :disabled="cartStore.loading">+</button>
             </div>
           </div>
-          <button 
-            class="cart-item-remove" 
-            @click="removeItem(item)"
-            :disabled="cartStore.loading"
+          <button
+              class="cart-item-remove"
+              @click="removeItem(item)"
+              :disabled="cartStore.loading"
           >
             {{ cartStore.loading ? '...' : 'Xóa' }}
           </button>
         </div>
         <div class="cart-total">
-          <span>Tổng tiền:</span>
-          <span class="cart-total-value">{{ formatPrice(cartStore.totalPrice) }}</span>
+          <span>Tạm tính:</span>
+          <span class="cart-total-value">{{ formatPrice(cartStore.finalTotal) }}</span>
         </div>
+
+        <!-- 👇 thêm hiển thị giảm giá nếu có -->
+        <div v-if="cartStore.discount > 0" class="cart-discount">
+          <span>Giảm giá:</span>
+          <span class="cart-discount-value">-{{ formatPrice(cartStore.discount) }}</span>
+        </div>
+
+        <div class="cart-final">
+          <span>Thành tiền:</span>
+          <span class="cart-final-value">{{ formatPrice(cartStore.totalPrice) }}</span>
+        </div>
+        <!-- Mã giảm giá -->
+        <div class="voucher-section">
+          <label for="voucher">Mã giảm giá</label>
+          <div class="voucher-input-group">
+            <input
+                id="voucher"
+                type="text"
+                v-model="cartStore.voucherCode"
+                placeholder="Nhập mã (VD: DEAL30)"
+                :disabled="cartStore.loading"
+            />
+            <button
+                type="button"
+                class="apply-voucher-btn"
+                @click="applyVoucher"
+                :disabled="cartStore.loading || !cartStore.voucherCode"
+            >
+              Áp dụng
+            </button>
+          </div>
+          <p v-if="cartStore.voucherMessage" class="voucher-message">
+            {{ cartStore.voucherMessage }}
+          </p>
+        </div>
+
       </div>
       <div class="cart-actions">
-        <button 
-          v-if="cartStore.items.length > 0" 
-          class="checkout-btn" 
-          @click="checkout"
-          :disabled="cartStore.loading"
+        <button
+            v-if="cartStore.items.length > 0"
+            class="checkout-btn"
+            @click="checkout"
+            :disabled="cartStore.loading"
         >
           Thanh toán
         </button>
@@ -85,6 +121,7 @@ export default {
       }
     }
   },
+
   methods: {
     formatPrice(price) {
       return new Intl.NumberFormat('vi-VN', {
@@ -144,22 +181,37 @@ export default {
         this.processingItemId = null;
       }
     },
-
+    async applyVoucher() {
+      try {
+        await this.cartStore.applyVoucher();
+      } catch (error) {
+        console.error('Lỗi áp dụng voucher tại component:', error);
+        this.$emit('error', 'Không thể áp dụng mã giảm giá');
+      }
+    },
     async checkout() {
       try {
-        // Xóa giỏ hàng
-        await this.cartStore.clearCart();
-        
+        if (!this.cartStore.items.length) {
+          alert('Giỏ hàng trống, không thể thanh toán');
+          return;
+        }
+
+
+        // Thông báo cho cha nếu cần
         this.$emit('checkout-success');
-        this.close();
-        
-        // Chuyển hướng đến trang thanh toán
+
+        // Đóng modal
+        this.$emit('close');
+        this.cartStore.clearError();
+
+        // Chuyển sang trang thanh toán, KHÔNG xóa giỏ
         this.$router.push('/checkout');
       } catch (error) {
         console.error('Lỗi khi thanh toán:', error);
         this.$emit('error', 'Không thể xử lý thanh toán');
       }
     },
+
 
     close() {
       this.cartStore.clearError();
@@ -342,4 +394,67 @@ export default {
   border-left: 4px solid #c62828;
   font-size: 14px;
 }
+
+.voucher-section {
+  margin-top: 16px;
+}
+
+.voucher-input-group {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.voucher-input-group input {
+  flex: 1;
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+}
+
+.apply-voucher-btn {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 4px;
+  background: #007bff;
+  color: #fff;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.apply-voucher-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.cart-discount {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 4px;
+  font-size: 14px;
+  color: #b30404;
+}
+
+.cart-discount-value {
+  color: #b30404;
+}
+
+.cart-final {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.cart-final-value {
+  color: #b30404;
+}
+
+.voucher-message {
+  margin-top: 4px;
+  font-size: 13px;
+  color: #555;
+}
+
 </style>

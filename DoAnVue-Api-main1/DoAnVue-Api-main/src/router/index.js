@@ -12,6 +12,7 @@ import AdminProductPage from "../components/AdminProductPage.vue";
 import ResetPassword from '../components/ResetPassword.vue';
 import VerifyEmail from '../components/VerifyEmail.vue'; // Import component VerifyEmail
 
+
 const routes = [
   {
     path: '/',
@@ -76,7 +77,15 @@ const routes = [
     meta: {
       title: 'Xác Thực Email'
     }
-  }
+  },
+    {
+        path: '/admin/vouchers',
+        name: 'AdminVouchers',
+        component: () => import('@/components/AdminVoucher.vue'),
+    },
+
+
+
 ];
 
 const router = createRouter({

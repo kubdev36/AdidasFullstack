@@ -1,22 +1,75 @@
 <template>
   <header class="hero">
     <nav class="nav-bar">
+      <!-- LOGO -->
       <div class="logo-container">
         <router-link to="/">
-          <img src="https://hienlaptop.com/wp-content/uploads/2024/12/logo-adidas-vector-4.jpg" alt="Adidas Logo" class="adidas-logo-img" />
+          <img
+              src="https://hienlaptop.com/wp-content/uploads/2024/12/logo-adidas-vector-4.jpg"
+              alt="Adidas Logo"
+              class="adidas-logo-img"
+          />
         </router-link>
       </div>
 
+      <!-- NAV MENU -->
       <div class="nav-menu-wrapper">
         <div class="hamburger-menu" @click="toggleMenu">
           <span class="bar"></span>
           <span class="bar"></span>
           <span class="bar"></span>
         </div>
+
         <nav :class="['nav-links', { active: isMenuActive }]">
           <ul>
             <li><router-link to="/">HOME PAGE</router-link></li>
-            <li><router-link to="/product">PRODUCT</router-link></li>
+
+            <!-- PRODUCT + MEGA MENU -->
+            <li
+                class="nav-item has-mega"
+                @mouseenter="openProductMega"
+                @mouseleave="closeProductMega"
+            >
+              <router-link to="/product">PRODUCT</router-link>
+
+              <div
+                  v-if="showProductMega && megaMenuData"
+                  class="mega-menu"
+              >
+                <!-- Cột text bên trái -->
+                <div
+                    v-for="category in megaMenuData.categories"
+                    :key="category.title"
+                    class="mega-column"
+                >
+                  <h4>{{ category.title }}</h4>
+                  <router-link
+                      v-for="item in category.items"
+                      :key="item.id"
+                      :to="`/product/${item.id}`"
+                  >
+                    {{ item.name }}
+                  </router-link>
+                </div>
+
+                <!-- Cột có hình giày -->
+                <div
+                    v-for="shoe in megaMenuData.shoes"
+                    :key="shoe.id"
+                    class="mega-column mega-shoe"
+                >
+                  <h4>{{ shoe.name }}</h4>
+                  <div
+                      class="mega-product-card"
+                      @click="goToCollection(shoe.id)"
+                  >
+                    <img :src="shoe.image" :alt="shoe.name" />
+                    <span>Shop {{ shoe.name }}</span>
+                  </div>
+                </div>
+              </div>
+            </li>
+
             <li><router-link to="/about">ABOUT</router-link></li>
             <li><router-link to="/contact">CONTACT</router-link></li>
             <li><router-link to="/blog">BLOG</router-link></li>
@@ -25,27 +78,33 @@
         </nav>
       </div>
 
+      <!-- RIGHT SECTION: SEARCH + CART + USER -->
       <div class="right-section-container">
+        <!-- SEARCH -->
         <div class="search-wrapper">
           <div class="header-search">
             <input
-              v-model="searchQuery"
-              @focus="showSearchDropdown = true"
-              @input="onInput"
-              @blur="onSearchBlur"
-              @keyup.enter="onSearchClick"
-              placeholder="Tìm kiếm sản phẩm..."
-              type="text"
+                v-model="searchQuery"
+                @focus="showSearchDropdown = true"
+                @input="onInput"
+                @blur="onSearchBlur"
+                @keyup.enter="onSearchClick"
+                placeholder="Tìm kiếm sản phẩm..."
+                type="text"
             />
             <div v-if="showSearchDropdown" class="search-dropdown">
               <div v-if="filteredProducts.length">
                 <div
-                  v-for="product in filteredProducts"
-                  :key="product.id"
-                  class="search-item"
-                  @mousedown.prevent="goToProduct(product.id)"
+                    v-for="product in filteredProducts"
+                    :key="product.id"
+                    class="search-item"
+                    @mousedown.prevent="goToProduct(product.id)"
                 >
-                  <img :src="product.image" alt="Product Image" class="search-item-img" />
+                  <img
+                      :src="product.image"
+                      alt="Product Image"
+                      class="search-item-img"
+                  />
                   <span class="search-item-name">{{ product.name }}</span>
                 </div>
               </div>
@@ -56,35 +115,47 @@
           </div>
         </div>
 
+        <!-- CART -->
         <div class="cart-icon-wrapper" @click="showCart = true">
           <i class="fa-solid fa-cart-shopping cart-icon"></i>
-          <span v-if="totalQuantity > 0" class="cart-badge">{{ totalQuantity }}</span>
+          <span v-if="totalQuantity > 0" class="cart-badge">
+            {{ totalQuantity }}
+          </span>
         </div>
 
+        <!-- USER + FAVORITE -->
         <ul class="user-action-icons">
           <li v-if="!currentUser">
             <router-link to="/auth" class="icon-link">
               <i class="fa-solid fa-user"></i>
             </router-link>
           </li>
-          <li v-else class="user-info-dropdown-wrapper" ref="userDropdownRef">
+
+          <li
+              v-else
+              class="user-info-dropdown-wrapper"
+              ref="userDropdownRef"
+          >
             <div
-              @click.stop="toggleUserMenu"
-              class="user-name-display"
+                @click.stop="toggleUserMenu"
+                class="user-name-display"
             >
               <span class="user-name-text">
                 {{ currentUser.name || currentUser.email || 'Người dùng' }}
               </span>
-              <i class="fa-solid fa-chevron-down chevron-icon" :class="{ 'rotate-chevron': showUserMenu }"></i>
+              <i
+                  class="fa-solid fa-chevron-down chevron-icon"
+                  :class="{ 'rotate-chevron': showUserMenu }"
+              ></i>
             </div>
 
             <div
-              v-if="showUserMenu"
-              :class="['logout-dropdown', { 'show-dropdown': showUserMenu }]"
+                v-if="showUserMenu"
+                :class="['logout-dropdown', { 'show-dropdown': showUserMenu }]"
             >
               <button
-                @click="logout"
-                class="logout-button"
+                  @click="logout"
+                  class="logout-button"
               >
                 Đăng xuất
               </button>
@@ -93,6 +164,7 @@
               </button>
             </div>
           </li>
+
           <li class="favorite-icon-item">
             <router-link to="/favoritesPage" class="icon-link">
               <i class="fa-solid fa-heart heart-icon"></i>
@@ -100,104 +172,94 @@
           </li>
         </ul>
       </div>
-
     </nav>
+
+    <!-- PROMO BAR -->
     <div class="box">
       <p>Use code DEAL for an extra 30% off. Exclusions apply.</p>
     </div>
+
+    <!-- CART MODAL -->
     <CartModal
-      :show="showCart"
-      :cartItems="cartStore.items"
-      @close="showCart = false"
-      @update:cartItems="cartStore.items = $event"
+        :show="showCart"
+        :cartItems="cartStore.items"
+        @close="showCart = false"
+        @update:cartItems="cartStore.items = $event"
     />
-
-
   </header>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import { useRouter } from 'vue-router';
+
 import { useProductStore } from '@/stores/productStore';
 import { useCartStore } from '@/stores/cartStore';
+import { useMegaMenuStore } from '@/stores/megaMenuStore';
+
 import CartModal from './CartModal.vue';
 
 const router = useRouter();
 
-// --- Logic Menu Hamburger ---
+/* --- Menu Hamburger --- */
 const isMenuActive = ref(false);
 const toggleMenu = () => {
   isMenuActive.value = !isMenuActive.value;
 };
 
-// --- Logic Xác thực người dùng (Sử dụng localStorage) ---
+/* --- Mega menu PRODUCT --- */
+const showProductMega = ref(false);
+const openProductMega = () => { showProductMega.value = true; };
+const closeProductMega = () => { showProductMega.value = false; };
+
+const megaMenuStore = useMegaMenuStore();
+const megaMenuData = computed(
+    () => megaMenuStore.data || { categories: [], shoes: [] }
+);
+
+const goToCollection = (id) => {
+  router.push(`/product/${id}`);
+  showProductMega.value = false;
+};
+
+/* --- Xác thực người dùng (localStorage) --- */
 const currentUser = ref(null);
-const showUserMenu = ref(false); // Biến để kiểm soát hiển thị dropdown menu
-const userDropdownRef = ref(null); // Ref để tham chiếu đến phần tử dropdown
+const showUserMenu = ref(false);
+const userDropdownRef = ref(null);
 
-onMounted(() => {
-  // Lấy thông tin người dùng từ localStorage khi component được mount
-  const user = localStorage.getItem('userLogin');
-  if (user) {
-    currentUser.value = JSON.parse(user);
-  }
-  console.log('Current User on mount:', currentUser.value); // Thêm log để kiểm tra currentUser
-
-  // Thêm listener để đóng menu khi click ra ngoài
-  document.addEventListener('click', handleClickOutside);
-});
-
-onBeforeUnmount(() => {
-  // Xóa listener khi component bị hủy
-  document.removeEventListener('click', handleClickOutside);
-});
-
-// Phương thức để bật/tắt menu dropdown
 const toggleUserMenu = () => {
   showUserMenu.value = !showUserMenu.value;
-  console.log('showUserMenu is now:', showUserMenu.value);
 };
 
-// Phương thức xử lý đăng xuất (Sử dụng localStorage)
 const logout = () => {
-  // Xóa thông tin người dùng khỏi localStorage
   localStorage.removeItem('userLogin');
-  currentUser.value = null; // Cập nhật trạng thái người dùng về null
-  showUserMenu.value = false; // Đóng dropdown
-  router.push('/'); // Đã thay đổi từ { name: 'Login' } thành '/'
+  currentUser.value = null;
+  showUserMenu.value = false;
+  router.push('/');
 };
 
-// Phương thức để đóng menu khi click ra ngoài
 const handleClickOutside = (event) => {
-  // Kiểm tra nếu click không phải bên trong phần tử userDropdownRef
-  // và menu đang hiển thị, thì đóng menu.
   if (userDropdownRef.value && !userDropdownRef.value.contains(event.target)) {
     showUserMenu.value = false;
   }
 };
 
-
-// --- Logic Giỏ hàng ---
+/* --- Giỏ hàng --- */
 const cartStore = useCartStore();
 const showCart = ref(false);
 const totalQuantity = computed(() => cartStore.totalQuantity);
 
-// --- Logic Tìm kiếm ---
+/* --- Tìm kiếm --- */
 const productsStore = useProductStore();
-const searchQuery = ref("");
+const searchQuery = ref('');
 const showSearchDropdown = ref(false);
 
 const filteredProducts = computed(() => {
   const q = searchQuery.value.trim().toLowerCase();
   if (!q) return [];
   return productsStore.products.filter(p =>
-    p.name && p.name.toLowerCase().includes(q)
+      p.name && p.name.toLowerCase().includes(q)
   );
-});
-
-onMounted(() => {
-  if (!productsStore.products.length) productsStore.fetchProducts();
 });
 
 const onInput = () => {
@@ -212,7 +274,7 @@ const onSearchClick = () => {
       router.push({ name: 'SearchResults', query: { q: searchQuery.value } });
     }
     showSearchDropdown.value = false;
-    searchQuery.value = "";
+    searchQuery.value = '';
   }
 };
 
@@ -220,7 +282,7 @@ const goToProduct = (id) => {
   const targetPath = `/product/${id}`;
   router.push(targetPath);
   showSearchDropdown.value = false;
-  searchQuery.value = "";
+  searchQuery.value = '';
 };
 
 const onSearchBlur = () => {
@@ -228,12 +290,37 @@ const onSearchBlur = () => {
     showSearchDropdown.value = false;
   }, 200);
 };
+
+/* --- Lifecycle --- */
+onMounted(() => {
+
+  megaMenuStore.fetchMegaMenu();
+
+  // user
+  const user = localStorage.getItem('userLogin');
+  if (user) {
+    currentUser.value = JSON.parse(user);
+  }
+
+  document.addEventListener('click', handleClickOutside);
+
+  // products cho search
+  if (!productsStore.products.length) {
+    productsStore.fetchProducts();
+  }
+
+  // mega menu data
+  megaMenuStore.fetchMegaMenu();
+});
+
+onBeforeUnmount(() => {
+  document.removeEventListener('click', handleClickOutside);
+});
 </script>
 
 <style scoped>
 /* GENERAL STYLES - Các style chung cho header */
 .hero {
-  /* Có thể thêm các style nền, chiều cao cho hero section nếu cần */
   width: 100%;
 }
 .nav-bar {
@@ -243,6 +330,7 @@ const onSearchBlur = () => {
   padding: 10px 20px;
   flex-wrap: wrap;        /* Giúp responsive tốt hơn */
   background-color: white; /* Đảm bảo nền trắng cho nav-bar */
+  position: relative;      /* Quan trọng cho mega-menu */
 }
 .logo-container {
   display: flex;
@@ -264,8 +352,6 @@ const onSearchBlur = () => {
   display: flex;
   margin: 0;
   padding: 0; /* Bỏ padding mặc định của ul */
-  /* background: white;  Nếu muốn nav-links có nền riêng */
-  /* margin-top: 20px;  Có thể bỏ nếu không cần khoảng cách này */
 }
 .nav-links li a {
   text-decoration: none;
@@ -299,6 +385,82 @@ const onSearchBlur = () => {
   margin: 3px 0; /* Điều chỉnh margin giữa các bar */
   transition: 0.4s;
   border-radius: 2px;
+}
+
+/* MEGA MENU PRODUCT */
+.nav-links .nav-item.has-mega {
+  position: static;
+}
+
+.mega-menu {
+  position: absolute;
+  top: calc(68% + 0px);
+  left: 50%;
+  transform: translateX(-50%);
+
+  width: 100%;
+  max-width: 1400px;
+  background-color: #fff;
+
+  border-top: 1px solid #eee;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+
+  padding: 20px 40px;
+
+  display: flex;
+  justify-content: space-between;
+  gap: 40px;
+
+  z-index: 999;
+  box-sizing: border-box;
+}
+
+
+
+.mega-column {
+  flex: 1;
+  min-width: 180px;
+}
+
+.mega-column h4 {
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+}
+
+.mega-column a {
+  display: block;
+  font-size: 14px;
+  color: #111;
+  padding: 3px 0;
+  text-decoration: none;
+}
+
+.mega-column a:hover {
+  text-decoration: underline;
+}
+
+.mega-column.mega-shoe {
+  max-width: 240px;
+}
+
+.mega-product-card {
+  margin-top: 10px;
+  cursor: pointer;
+}
+
+.mega-product-card img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.mega-product-card span {
+  display: block;
+  margin-top: 6px;
+  font-size: 13px;
+  font-weight: 500;
 }
 
 /* PROMOTIONAL BOX */
@@ -336,7 +498,6 @@ const onSearchBlur = () => {
   background-color: #fff;
   padding: 5px 10px;
   width: 250px;
-  /* position: relative; Removed, already on .search-wrapper */
 }
 .header-search input {
   flex: 1;
@@ -344,7 +505,7 @@ const onSearchBlur = () => {
   outline: none;
   font-size: 14px;
   background-color: transparent;
-  padding: 0; /* Bỏ padding mặc định của input nếu có */
+  padding: 0;
 }
 
 /* SEARCH DROPDOWN */
@@ -426,23 +587,17 @@ const onSearchBlur = () => {
 
 /* USER ACTION ICONS (User/Favorite) */
 .user-action-icons {
-  list-style: none; /* Bỏ dấu chấm mặc định của ul */
+  list-style: none;
   margin: 0;
   padding: 0;
-  display: flex; /* Quan trọng để các li nằm ngang */
+  display: flex;
   align-items: center;
 }
-.user-action-icons li {
-  /* Khoảng cách giữa các li, nếu không dùng gap */
-  /* margin-right: 20px; */
-}
-
-/* Common icon link style */
 .icon-link {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px; /* Kích thước icon */
+  width: 40px;
   height: 40px;
   border-radius: 50%;
   transition: background-color 0.2s ease;
@@ -451,24 +606,23 @@ const onSearchBlur = () => {
   background-color: #f0f0f0;
 }
 .icon-link .fa-solid {
-  font-size: 20px; /* Kích thước Font Awesome icon */
-  color: #666; /* Màu icon mặc định */
+  font-size: 20px;
+  color: #666;
 }
 .icon-link .heart-icon {
-  color: #e74c3c; /* Màu đỏ cho icon trái tim */
+  color: #e74c3c;
 }
 
-/* USER INFO & DROPDOWN - Custom styles for the user dropdown */
+/* USER INFO & DROPDOWN */
 .user-info-dropdown-wrapper {
-  position: relative; /* Quan trọng: để dropdown con có vị trí tuyệt đối */
-  /* margin-right: 20px; */ /* Nếu bạn muốn khoảng cách với icon tiếp theo */
+  position: relative;
 }
 .user-name-display {
   display: flex;
   align-items: center;
   padding: 8px 12px;
   cursor: pointer;
-  border-radius: 20px; /* Bo tròn tương tự nút */
+  border-radius: 20px;
   transition: background-color 0.2s ease;
 }
 .user-name-display:hover {
@@ -478,7 +632,7 @@ const onSearchBlur = () => {
   font-weight: 600;
   color: #333;
   font-size: 15px;
-  margin-right: 5px; /* Khoảng cách giữa tên và mũi tên */
+  margin-right: 5px;
 }
 .chevron-icon {
   font-size: 12px;
@@ -501,16 +655,14 @@ const onSearchBlur = () => {
   width: 160px;
   z-index: 100;
   overflow: hidden;
-  opacity: 0; /* Ẩn ban đầu */
-  visibility: hidden; /* Ẩn ban đầu */
-  transition: opacity 0.2s ease, visibility 0.2s ease; /* Thêm transition */
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
 }
-/* Quy tắc để hiển thị dropdown */
 .logout-dropdown.show-dropdown {
   opacity: 1;
   visibility: visible;
 }
-
 .logout-dropdown .logout-button {
   display: block;
   width: 100%;
@@ -527,13 +679,14 @@ const onSearchBlur = () => {
   background-color: #f5f5f5;
 }
 
-/* CSS cho khoảng cách giữa các icon người dùng/tên và icon yêu thích */
+/* Khoảng cách giữa tên user và icon tim */
 .user-action-icons .favorite-icon-item {
-  margin-left: 30px; /* Điều chỉnh giá trị này để khoảng cách xa hơn theo ý bạn */
+  margin-left: 30px;
 }
+
 .admin_css {
   padding: 10px 20px;
-  background-color: #3498db; /* Màu xanh dương */
+  background-color: #3498db;
   color: white;
   border: none;
   border-radius: 5px;
@@ -543,14 +696,19 @@ const onSearchBlur = () => {
   transition: background-color 0.3s ease, transform 0.2s ease;
   text-transform: uppercase;
 }
-
 .admin_css:hover {
-  background-color: #2980b9; /* Màu tối hơn khi hover */
-  transform: scale(1.05); /* Phóng to nhẹ khi hover */
+  background-color: #2980b9;
+  transform: scale(1.05);
 }
-
 .admin_css a {
   text-decoration: none;
-  color: inherit; /* Kế thừa màu chữ từ button cha */
+  color: inherit;
+}
+
+/* Ẩn mega menu trên mobile */
+@media (max-width: 992px) {
+  .mega-menu {
+    display: none !important;
+  }
 }
 </style>

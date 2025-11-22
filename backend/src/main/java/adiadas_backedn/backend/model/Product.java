@@ -11,6 +11,7 @@ import java.util.Set;
 @Table(name = "products")
 public class Product {
     @Id
+    @Column(name = "id", length = 50)
     private String id;
 
     @Column(nullable = false)

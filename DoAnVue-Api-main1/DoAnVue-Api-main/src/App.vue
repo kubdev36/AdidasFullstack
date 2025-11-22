@@ -3,9 +3,20 @@
   </template>
 
   <script>
+  import { onMounted } from 'vue';
+  import { useCartStore } from '@/stores/cartStore';
 
   export default {
     name: 'App',
+    setup() {
+      const cartStore = useCartStore();
+
+      onMounted(() => {
+        cartStore.clearVoucher();
+      });
+
+      return {};
+    },
   };
   </script>
 

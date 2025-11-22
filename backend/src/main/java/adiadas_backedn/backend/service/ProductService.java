@@ -5,6 +5,7 @@ import adiadas_backedn.backend.repository.ProductRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import adiadas_backedn.backend.dto.MegaMenuDTO;
 
 import java.util.List;
 import java.util.Optional;
@@ -89,6 +90,7 @@ public class ProductService {
         return productRepository.save(product);
     }
 
+
     public void deleteProduct(String id) {
         productRepository.deleteById(id);
     }
@@ -96,4 +98,42 @@ public class ProductService {
     private String generateProductId() {
         return "prod_" + System.currentTimeMillis();
     }
+
+
+    public MegaMenuDTO getMegaMenuData() {
+
+        // 1. GIÀY HÀNG MỚI VỀ = 4 sp mới nhất
+        List<Product> newest = productRepository.findTop4NewestProductsNative();
+        List<MegaMenuDTO.Item> newestItems = newest.stream()
+                .map(p -> new MegaMenuDTO.Item(p.getId(), p.getName()))
+                .toList();
+        MegaMenuDTO.Category newestBlock =
+                new MegaMenuDTO.Category("GIÀY HÀNG MỚI VỀ", newestItems);
+
+        // 2. TRENDING SHOES = 4 sp featured
+        List<Product> featured = productRepository.findFeaturedProductsNative();
+        List<MegaMenuDTO.Item> trendingItems = featured.stream()
+                .limit(4)
+                .map(p -> new MegaMenuDTO.Item(p.getId(), p.getName()))
+                .toList();
+        MegaMenuDTO.Category trendingBlock =
+                new MegaMenuDTO.Category("TRENDING SHOES", trendingItems);
+
+        // 3. Các card có hình – cũng lấy 4 featured đầu tiên
+        List<MegaMenuDTO.Shoe> shoeCards = featured.stream()
+                .limit(4)
+                .map(p -> new MegaMenuDTO.Shoe(
+                        p.getId(),
+                        p.getName(),
+                        p.getImage(),
+                        p.getCategory()
+                ))
+                .toList();
+
+        return new MegaMenuDTO(
+                List.of(newestBlock, trendingBlock),
+                shoeCards
+        );
+    }
+
 }
