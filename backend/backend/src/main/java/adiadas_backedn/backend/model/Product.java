@@ -11,6 +11,8 @@ import java.util.Set;
 @Table(name = "products")
 public class Product {
     @Id
+    // 🔥 SỬA: Thêm length = 50
+    @Column(name = "id", length = 50)
     private String id;
 
     @Column(nullable = false)
@@ -59,15 +61,13 @@ public class Product {
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<ProductSize> sizes = new HashSet<>();
 
-    // THÊM: Quan hệ với ProductVideo
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<ProductVideo> videos = new HashSet<>();
 
-    // Constructors
     public Product() {
     }
 
-    // Getters and Setters
+    // Getters and Setters (Giữ nguyên)
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
     public String getName() { return name; }
@@ -100,17 +100,12 @@ public class Product {
     public void setDescription(String description) { this.description = description; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
-
     public Set<ProductImage> getImages() { return images; }
     public void setImages(Set<ProductImage> images) { this.images = images; }
-
     public Set<ProductColor> getColors() { return colors; }
     public void setColors(Set<ProductColor> colors) { this.colors = colors; }
-
     public Set<ProductSize> getSizes() { return sizes; }
     public void setSizes(Set<ProductSize> sizes) { this.sizes = sizes; }
-
-    // THÊM: Getter/Setter cho videos
     public Set<ProductVideo> getVideos() { return videos; }
     public void setVideos(Set<ProductVideo> videos) { this.videos = videos; }
 

@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import adiadas_backedn.backend.dto.MegaMenuDTO;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -136,6 +137,16 @@ public class ProductController {
             productService.deleteProduct(id);
             return ResponseEntity.ok().build();
         } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+    @GetMapping("/mega-menu")
+    public ResponseEntity<MegaMenuDTO> getMegaMenu() {
+        try {
+            MegaMenuDTO data = productService.getMegaMenuData();
+            return ResponseEntity.ok(data);
+        } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
