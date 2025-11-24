@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 5.2.0
+-- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Host: localhost:3306
--- Generation Time: Nov 09, 2025 at 01:28 PM
--- Server version: 8.0.30
--- PHP Version: 8.1.10
+-- Máy chủ: 127.0.0.1
+-- Thời gian đã tạo: Th10 24, 2025 lúc 01:11 AM
+-- Phiên bản máy phục vụ: 10.4.32-MariaDB
+-- Phiên bản PHP: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -18,72 +18,78 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `adidasdb`
+-- Cơ sở dữ liệu: `adidasdb`
 --
+CREATE DATABASE IF NOT EXISTS `adidasdb` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE `adidasdb`;
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `cart`
+-- Cấu trúc bảng cho bảng `cart`
 --
 
+DROP TABLE IF EXISTS `cart`;
 CREATE TABLE `cart` (
-  `id` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `user_id` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `total` decimal(10,2) DEFAULT '0.00',
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP
+  `id` varchar(50) NOT NULL,
+  `user_id` varchar(50) NOT NULL,
+  `total` decimal(10,2) DEFAULT 0.00,
+  `created_at` timestamp NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Dumping data for table `cart`
+-- Đang đổ dữ liệu cho bảng `cart`
 --
 
 INSERT INTO `cart` (`id`, `user_id`, `total`, `created_at`) VALUES
-('a757', '1bf4', '110.00', '2025-11-06 01:39:21');
+('6bd5ad10', '26de9f53', 0.00, '2025-11-23 05:41:20'),
+('a757', '1bf4', 110.00, '2025-11-06 01:39:21');
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `cart_items`
+-- Cấu trúc bảng cho bảng `cart_items`
 --
 
+DROP TABLE IF EXISTS `cart_items`;
 CREATE TABLE `cart_items` (
-  `id` bigint NOT NULL,
-  `cart_id` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `product_id` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `product_name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `image` text COLLATE utf8mb4_unicode_ci,
-  `price` decimal(10,2) NOT NULL,
-  `color_name` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `size_value` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `quantity` int NOT NULL DEFAULT '1'
+  `id` bigint(20) NOT NULL,
+  `cart_id` varchar(50) DEFAULT NULL,
+  `product_id` varchar(50) DEFAULT NULL,
+  `product_name` varchar(255) NOT NULL,
+  `image` varchar(255) DEFAULT NULL,
+  `price` decimal(38,2) DEFAULT NULL,
+  `color_name` varchar(255) DEFAULT NULL,
+  `size_value` varchar(255) DEFAULT NULL,
+  `quantity` int(11) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Dumping data for table `cart_items`
+-- Đang đổ dữ liệu cho bảng `cart_items`
 --
 
 INSERT INTO `cart_items` (`id`, `cart_id`, `product_id`, `product_name`, `image`, `price`, `color_name`, `size_value`, `quantity`) VALUES
-(1, 'a757', '3', 'Handball Spezial Shoes', 'https://assets.adidas.com/images/e_trim/c_lpad,w_iw,h_ih/b_rgb:EAEEEF/w_180,f_auto,q_auto,fl_lossy,c_fill,g_auto/344abe967fab43f2883580d7f65d48de_9366/Handball_Spezial_Shoes_Blue_IF9532_00_plp_standard.jpg', '110.00', 'Blue (1)', '8', 1);
+(1, 'a757', '3', 'Handball Spezial Shoes', 'https://assets.adidas.com/images/e_trim/c_lpad,w_iw,h_ih/b_rgb:EAEEEF/w_180,f_auto,q_auto,fl_lossy,c_fill,g_auto/344abe967fab43f2883580d7f65d48de_9366/Handball_Spezial_Shoes_Blue_IF9532_00_plp_standard.jpg', 110.00, 'Blue (1)', '8', 1);
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `collections`
+-- Cấu trúc bảng cho bảng `collections`
 --
 
+DROP TABLE IF EXISTS `collections`;
 CREATE TABLE `collections` (
-  `id` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `description` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `image` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `video` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `link` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP
+  `id` varchar(255) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `description` varchar(500) DEFAULT NULL,
+  `image` varchar(255) DEFAULT NULL,
+  `video` varchar(255) DEFAULT NULL,
+  `link` varchar(255) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Dumping data for table `collections`
+-- Đang đổ dữ liệu cho bảng `collections`
 --
 
 INSERT INTO `collections` (`id`, `name`, `description`, `image`, `video`, `link`, `created_at`) VALUES
@@ -95,18 +101,19 @@ INSERT INTO `collections` (`id`, `name`, `description`, `image`, `video`, `link`
 -- --------------------------------------------------------
 
 --
--- Table structure for table `favorites`
+-- Cấu trúc bảng cho bảng `favorites`
 --
 
+DROP TABLE IF EXISTS `favorites`;
 CREATE TABLE `favorites` (
-  `id` bigint NOT NULL,
-  `user_id` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `product_id` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `added_date` timestamp NULL DEFAULT CURRENT_TIMESTAMP
+  `id` bigint(20) NOT NULL,
+  `user_id` varchar(50) NOT NULL,
+  `product_id` varchar(50) NOT NULL,
+  `added_date` timestamp NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Dumping data for table `favorites`
+-- Đang đổ dữ liệu cho bảng `favorites`
 --
 
 INSERT INTO `favorites` (`id`, `user_id`, `product_id`, `added_date`) VALUES
@@ -116,76 +123,134 @@ INSERT INTO `favorites` (`id`, `user_id`, `product_id`, `added_date`) VALUES
 -- --------------------------------------------------------
 
 --
--- Table structure for table `orders`
+-- Cấu trúc bảng cho bảng `orders`
 --
 
+DROP TABLE IF EXISTS `orders`;
 CREATE TABLE `orders` (
-  `id` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `customer_name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `email` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `phone_number` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `address` text COLLATE utf8mb4_unicode_ci NOT NULL,
-  `notes` text COLLATE utf8mb4_unicode_ci,
-  `order_value` decimal(10,2) NOT NULL,
-  `order_date` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `user_id` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL
+  `id` varchar(50) NOT NULL,
+  `customer_name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `phone_number` varchar(255) DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `notes` varchar(255) DEFAULT NULL,
+  `order_value` decimal(38,2) DEFAULT NULL,
+  `order_date` timestamp NULL DEFAULT current_timestamp(),
+  `user_id` varchar(50) DEFAULT NULL,
+  `payment_method` varchar(255) DEFAULT NULL,
+  `status` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Dumping data for table `orders`
+-- Đang đổ dữ liệu cho bảng `orders`
 --
 
-INSERT INTO `orders` (`id`, `customer_name`, `email`, `phone_number`, `address`, `notes`, `order_value`, `order_date`, `user_id`) VALUES
-('476b', 'haha', 'haha@gmail.com', '000000000000000000000000', 'q', 'DA', '90.00', '2025-11-06 01:39:21', NULL),
-('6d2f', 'haha', 'haha@gmail.com', '16', 'dg', 'eg', '90.00', '2025-11-06 01:39:21', NULL),
-('b0d5', 'John Doe', 'john.doe@example.com', '0123456789', '123 Main St, District 1, Ho Chi Minh City', 'Please deliver in the afternoon', '1500000.00', '2025-11-06 01:39:21', NULL);
+INSERT INTO `orders` (`id`, `customer_name`, `email`, `phone_number`, `address`, `notes`, `order_value`, `order_date`, `user_id`, `payment_method`, `status`) VALUES
+('476b', 'haha', 'haha@gmail.com', '000000000000000000000000', 'q', 'DA', 90.00, '2025-11-06 01:39:21', NULL, NULL, NULL),
+('6d2f', 'haha', 'haha@gmail.com', '16', 'dg', 'eg', 90.00, '2025-11-06 01:39:21', NULL, NULL, NULL),
+('b0d5', 'John Doe', 'john.doe@example.com', '0123456789', '123 Main St, District 1, Ho Chi Minh City', 'Please deliver in the afternoon', 1500000.00, '2025-11-06 01:39:21', NULL, NULL, NULL),
+('ORD-0102e560', 'hai', 'dhai85159@gmail.com', 'q', 'q', 'q', 5000.00, '2025-11-23 09:09:28', '26de9f53', 'QR_CODE', 'PENDING'),
+('ORD-054e51ae', 'hai', 'dhai85159@gmail.com', 'z', 'z', 'z', 110.00, '2025-11-23 06:28:23', '26de9f53', 'QR_CODE', 'PENDING'),
+('ORD-084b93b6', 'hai', 'dhai85159@gmail.com', 'q', 'q', 'q', 5000.00, '2025-11-23 08:52:57', '26de9f53', 'QR_CODE', 'PENDING'),
+('ORD-0c6d99e9', 'hai', 'dhai85159@gmail.com', 'd', 'd', 'd', 5000.00, '2025-11-23 07:10:55', '26de9f53', 'QR_CODE', 'PAID'),
+('ORD-102bcf64', 'hai', 'dhai85159@gmail.com', '0867447893', '111 hẽm 331 đâ go vâp hô chi minh', 'giao nhanh cẩn thận dùng tôi', 110000.00, '2025-11-23 06:39:11', '26de9f53', 'QR_CODE', 'PENDING'),
+('ORD-189d2d8d', 'hai', 'dhai85159@gmail.com', 'g', 'g', 'g', 5000.00, '2025-11-23 09:16:23', '26de9f53', 'QR_CODE', 'PENDING'),
+('ORD-1b057fe9', 'hai', 'dhai85159@gmail.com', 'o', 'o', 'o', 5000.00, '2025-11-23 07:02:21', '26de9f53', 'QR_CODE', 'PENDING'),
+('ORD-1d304ad3', 'hai', 'dhai85159@gmail.com', 'q', 'q', 'q', 5000.00, '2025-11-23 08:05:48', '26de9f53', 'QR_CODE', 'PENDING'),
+('ORD-3f977806', 'hai', 'dhai85159@gmail.com', 's', 's', 's', 110000.00, '2025-11-23 06:34:27', '26de9f53', 'QR_CODE', 'PENDING'),
+('ORD-434530e8', 'hai', 'dhai85159@gmail.com', 'g', 'g', 'g', 5000.00, '2025-11-23 09:21:04', '26de9f53', 'QR_CODE', 'PENDING'),
+('ORD-4920e833', 'hai', 'dhai85159@gmail.com', '0867447893', 'GO Gò Vấp – 792 Nguyễn Kiệm, Tp HCM', 'ghi chú cần nhập', 5000.00, '2025-11-23 06:41:56', '26de9f53', 'QR_CODE', 'PENDING'),
+('ORD-4eb9b2d7', 'hai', 'dhai85159@gmail.com', 's', 's', 's', 220.00, '2025-11-23 05:58:58', '26de9f53', 'QR_CODE', 'PENDING'),
+('ORD-66d01802', 'hai', 'dhai85159@gmail.com', 's', 's', 's', 220.00, '2025-11-23 06:25:44', '26de9f53', 'QR_CODE', 'PAID'),
+('ORD-7e4496d8', 'hai', 'dhai85159@gmail.com', 'q', 'q', 'q', 5000.00, '2025-11-23 07:46:54', '26de9f53', 'QR_CODE', 'PENDING'),
+('ORD-89b2e6d8', 'hai', 'dhai85159@gmail.com', 'a', 'a', 'a', 5000.00, '2025-11-23 06:49:27', '26de9f53', 'QR_CODE', 'PENDING'),
+('ORD-8c116ed7', 'hai', 'dhai85159@gmail.com', 'y', 'y', 'y', 5000.00, '2025-11-23 09:49:31', '26de9f53', 'QR_CODE', 'PENDING'),
+('ORD-8d0127c9', 'hai', 'dhai85159@gmail.com', 'y', 'y', 'y', 5000.00, '2025-11-23 09:50:48', '26de9f53', 'QR_CODE', 'PAID'),
+('ORD-9cad6a20', 'hai', 'dhai85159@gmail.com', 'a', 'a', 'a', 5000.00, '2025-11-24 00:08:52', '26de9f53', 'COD', 'PENDING'),
+('ORD-a05a3e8c', 'hai', 'dhai85159@gmail.com', '0867447893', 'GO Gò Vấp – 792 Nguyễn Kiệm, Tp HCM', 'ghi chú cần nhập', 5000.00, '2025-11-23 06:44:57', '26de9f53', 'QR_CODE', 'PENDING'),
+('ORD-a19397a9', 'hai', 'dhai85159@gmail.com', 'o', 'o', 'o', 5000.00, '2025-11-23 07:08:50', '26de9f53', 'QR_CODE', 'PAID'),
+('ORD-a60047a7', 'hai', 'dhai85159@gmail.com', 'a', 'a', 'a', 90000.00, '2025-11-23 07:24:22', '26de9f53', 'QR_CODE', 'PAID'),
+('ORD-ac65ec53', 'hai', 'dhai85159@gmail.com', 'd', 'd', 'd', 220.00, '2025-11-23 05:41:50', '26de9f53', 'QR_CODE', 'PENDING'),
+('ORD-e5ef3530', 'hai', 'dhai85159@gmail.com', 'y', 'y', 'y', 5000.00, '2025-11-23 09:25:30', '26de9f53', 'QR_CODE', 'PENDING'),
+('ORD-e84265a7', 'hai', 'dhai85159@gmail.com', 'y', 'y', 'y', 5000.00, '2025-11-23 09:46:21', '26de9f53', 'QR_CODE', 'PENDING'),
+('ORD-f024e642', 'hai', 'dhai85159@gmail.com', 'y', 'y', 'y', 5000.00, '2025-11-23 09:42:29', '26de9f53', 'QR_CODE', 'PENDING');
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `order_items`
+-- Cấu trúc bảng cho bảng `order_items`
 --
 
+DROP TABLE IF EXISTS `order_items`;
 CREATE TABLE `order_items` (
-  `id` bigint NOT NULL,
-  `order_id` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `product_name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `quantity` int NOT NULL,
-  `price` decimal(10,2) NOT NULL,
-  `product_id` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `color_name` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `size_value` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL
+  `id` bigint(20) NOT NULL,
+  `order_id` varchar(50) DEFAULT NULL,
+  `product_name` varchar(255) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `price` decimal(38,2) DEFAULT NULL,
+  `product_id` varchar(50) DEFAULT NULL,
+  `color_name` varchar(255) DEFAULT NULL,
+  `size_value` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Dumping data for table `order_items`
+-- Đang đổ dữ liệu cho bảng `order_items`
 --
 
 INSERT INTO `order_items` (`id`, `order_id`, `product_name`, `quantity`, `price`, `product_id`, `color_name`, `size_value`) VALUES
-(1, 'b0d5', 'Adidas Sneakers', 1, '1500000.00', '1', NULL, NULL),
-(2, '6d2f', 'TOKYO SHOES', 1, '90.00', '2', NULL, NULL),
-(3, '476b', 'TOKYO SHOES', 1, '90.00', '2', NULL, NULL);
+(1, 'b0d5', 'Adidas Sneakers', 1, 1500000.00, '1', NULL, NULL),
+(2, '6d2f', 'TOKYO SHOES', 1, 90.00, '2', NULL, NULL),
+(3, '476b', 'TOKYO SHOES', 1, 90.00, '2', NULL, NULL),
+(4, 'ORD-ac65ec53', 'Sản phẩm 1', 1, 110.00, '1', 'Black', '8'),
+(5, 'ORD-ac65ec53', 'Sản phẩm 1', 1, 110.00, '1', 'White', '8'),
+(6, 'ORD-4eb9b2d7', 'Sản phẩm 1', 1, 110.00, '1', 'Black', '8'),
+(7, 'ORD-4eb9b2d7', 'Sản phẩm 1', 1, 110.00, '1', 'White', '8'),
+(8, 'ORD-66d01802', 'Sản phẩm 1', 1, 110.00, '1', 'Black', '8'),
+(9, 'ORD-66d01802', 'Sản phẩm 1', 1, 110.00, '1', 'White', '8'),
+(10, 'ORD-054e51ae', 'Sản phẩm 1', 1, 110.00, '1', 'Black', '7'),
+(11, 'ORD-3f977806', 'Sản phẩm 1', 1, 110000.00, '1', 'Black', '8.5'),
+(12, 'ORD-102bcf64', 'Sản phẩm 1', 1, 110000.00, '1', 'Black', '8.5'),
+(13, 'ORD-4920e833', 'Sản phẩm 1', 1, 5000.00, '1', 'White', '10'),
+(14, 'ORD-a05a3e8c', 'Sản phẩm 1', 1, 5000.00, '1', 'White', '10'),
+(15, 'ORD-89b2e6d8', 'Sản phẩm 1', 1, 5000.00, '1', 'White', '10'),
+(16, 'ORD-1b057fe9', 'Sản phẩm 1', 1, 5000.00, '1', 'White', '10'),
+(17, 'ORD-a19397a9', 'Sản phẩm 1', 1, 5000.00, '1', 'White', '10'),
+(18, 'ORD-0c6d99e9', 'Sản phẩm 1', 1, 5000.00, '1', 'White', '5'),
+(19, 'ORD-a60047a7', 'Sản phẩm 2', 1, 90000.00, '2', 'Pink', '5.5'),
+(20, 'ORD-7e4496d8', 'Sản phẩm 1', 1, 5000.00, '1', 'White', '8.5'),
+(21, 'ORD-1d304ad3', 'Sản phẩm 1', 1, 5000.00, '1', 'White', '8.5'),
+(22, 'ORD-084b93b6', 'Sản phẩm 1', 1, 5000.00, '1', 'White', '8.5'),
+(23, 'ORD-0102e560', 'Sản phẩm 1', 1, 5000.00, '1', 'White', '8.5'),
+(24, 'ORD-189d2d8d', 'Sản phẩm 1', 1, 5000.00, '1', 'White', '6'),
+(25, 'ORD-434530e8', 'Sản phẩm 1', 1, 5000.00, '1', 'White', '6'),
+(26, 'ORD-e5ef3530', 'Sản phẩm 1', 1, 5000.00, '1', 'White', '6'),
+(27, 'ORD-f024e642', 'Sản phẩm 1', 1, 5000.00, '1', 'White', '6'),
+(28, 'ORD-e84265a7', 'Sản phẩm 1', 1, 5000.00, '1', 'White', '6'),
+(29, 'ORD-8c116ed7', 'Sản phẩm 1', 1, 5000.00, '1', 'White', '6'),
+(30, 'ORD-8d0127c9', 'Sản phẩm 1', 1, 5000.00, '1', 'White', '6'),
+(31, 'ORD-9cad6a20', 'Sản phẩm 1', 1, 5000.00, '1', 'Black', '5');
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `posts`
+-- Cấu trúc bảng cho bảng `posts`
 --
 
+DROP TABLE IF EXISTS `posts`;
 CREATE TABLE `posts` (
-  `id` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `brand` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `day` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `time` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `title` varchar(500) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `description` text COLLATE utf8mb4_unicode_ci,
-  `content` longtext COLLATE utf8mb4_unicode_ci,
-  `image` text COLLATE utf8mb4_unicode_ci,
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP
+  `id` varchar(50) NOT NULL,
+  `brand` varchar(100) NOT NULL,
+  `day` varchar(100) DEFAULT NULL,
+  `time` varchar(100) DEFAULT NULL,
+  `title` varchar(500) NOT NULL,
+  `description` text DEFAULT NULL,
+  `content` longtext DEFAULT NULL,
+  `image` text DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Dumping data for table `posts`
+-- Đang đổ dữ liệu cho bảng `posts`
 --
 
 INSERT INTO `posts` (`id`, `brand`, `day`, `time`, `title`, `description`, `content`, `image`, `created_at`) VALUES
@@ -196,71 +261,73 @@ INSERT INTO `posts` (`id`, `brand`, `day`, `time`, `title`, `description`, `cont
 -- --------------------------------------------------------
 
 --
--- Table structure for table `products`
+-- Cấu trúc bảng cho bảng `products`
 --
 
+DROP TABLE IF EXISTS `products`;
 CREATE TABLE `products` (
-  `id` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `id` varchar(50) NOT NULL,
+  `name` varchar(255) NOT NULL,
   `price` double DEFAULT NULL,
-  `featured` tinyint(1) DEFAULT '0',
-  `category` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `image` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `hover_image` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `link` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `rating` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `promoCodes` text COLLATE utf8mb4_unicode_ci,
-  `paymentOptions` text COLLATE utf8mb4_unicode_ci,
-  `shipping` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `returnsExchanges` text COLLATE utf8mb4_unicode_ci,
-  `sizingNote` text COLLATE utf8mb4_unicode_ci,
-  `description` varchar(1000) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `payment_options` varchar(1000) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `promo_codes` varchar(1000) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `returns_exchanges` varchar(1000) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `sizing_note` varchar(1000) COLLATE utf8mb4_unicode_ci DEFAULT NULL
+  `featured` tinyint(1) DEFAULT 0,
+  `category` varchar(255) DEFAULT NULL,
+  `image` varchar(255) DEFAULT NULL,
+  `hover_image` varchar(255) DEFAULT NULL,
+  `link` varchar(255) DEFAULT NULL,
+  `rating` varchar(255) DEFAULT NULL,
+  `promoCodes` text DEFAULT NULL,
+  `paymentOptions` text DEFAULT NULL,
+  `shipping` varchar(255) DEFAULT NULL,
+  `returnsExchanges` text DEFAULT NULL,
+  `sizingNote` text DEFAULT NULL,
+  `description` varchar(1000) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT current_timestamp(),
+  `payment_options` varchar(1000) DEFAULT NULL,
+  `promo_codes` varchar(1000) DEFAULT NULL,
+  `returns_exchanges` varchar(1000) DEFAULT NULL,
+  `sizing_note` varchar(1000) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Dumping data for table `products`
+-- Đang đổ dữ liệu cho bảng `products`
 --
 
 INSERT INTO `products` (`id`, `name`, `price`, `featured`, `category`, `image`, `hover_image`, `link`, `rating`, `promoCodes`, `paymentOptions`, `shipping`, `returnsExchanges`, `sizingNote`, `description`, `created_at`, `payment_options`, `promo_codes`, `returns_exchanges`, `sizing_note`) VALUES
-('1', 'SAMBA SHOES', 110, 1, 'Giày thời trang', 'https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/51fa97b24eb5404b809c29a39a87fca4_9366/Sambae_Shoes_White_JI1349_01_standard.jpg', 'https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/a78262c770cd4f328ce7f2b14654bc59_9366/Sambae_Shoes_White_JI1349_02_standard_hover.jpg', 'samba.html', '6 out of 6 stars', 'Use code DEAL for an extra 30% off. Exclusions apply.', '4 interest-free payments available with Klarna. Learn More', 'Free shipping with Adiclun', '30 days returns and exchanges', 'True to size. We recommend ordering your usual size.', 'Premium quality shoes with comfortable fit and modern design. Perfect for everyday wear and light athletic activities.', '2025-11-06 01:39:21', NULL, NULL, NULL, NULL),
-('10', 'TOKYO SHOES copy1', 90, 1, 'Giày thể thao', 'https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/c3ed7e0662f747718a5a16fe34932d60_9366/Tokyo_Shoes_Green_JI3298_01_00_standard.jpg', 'https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/6e88efe72a8e4f20a05e8e58563d98b5_9366/Tokyo_Shoes_Green_JI3298_02_standard_hover.jpg', 'tokyo.html', '6 out of 6 stars', 'Use code DEAL for an extra 30% off. Exclusions apply.', '4 interest-free payments available with Klarna. Learn More', 'Free shipping with Adiclun', '30 days returns and exchanges', 'True to size. We recommend ordering your usual size.', 'Premium quality shoes with comfortable fit and modern design. Perfect for everyday wear and light athletic activities.', '2025-11-06 01:39:21', NULL, NULL, NULL, NULL),
-('11', 'Handball Spezial Shoes copy1', 110, 1, 'Giày thời trang', 'https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/6218f8cc55984cfe92d1a96d0110ac7e_9366/Handball_Spezial_Shoes_Black_DB3021_01_00_standard.jpg', 'https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/96c5eb48a9074ee9889aa96d0110ca89_9366/Handball_Spezial_Shoes_Black_DB3021_02_standard_hover.jpg', 'handball.html', '6 out of 6 stars', 'Use code DEAL for an extra 30% off. Exclusions apply.', '4 interest-free payments available with Klarna. Learn More', 'Free shipping with Adiclun', '30 days returns and exchanges', 'True to size. We recommend ordering your usual size.', 'Premium quality shoes with comfortable fit and modern design. Perfect for everyday wear and light athletic activities.', '2025-11-06 01:39:21', NULL, NULL, NULL, NULL),
-('12', 'Samba OG Shoes copy1', 100, 1, 'Giày thời trang', 'https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/4c70105150234ac4b948a8bf01187e0c_9366/Samba_OG_Shoes_Black_B75807_01_standard.jpg', 'https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/309a0c8f53dd45d3a3bea8bf0118aa6b_9366/Samba_OG_Shoes_Black_B75807_02_standard.jpg', 'real.html', '6 out of 6 stars', 'Use code DEAL for an extra 30% off. Exclusions apply.', '4 interest-free payments available with Klarna. Learn More', 'Free shipping with Adiclun', '30 days returns and exchanges', 'True to size. We recommend ordering your usual size.', 'Premium quality shoes with comfortable fit and modern design. Perfect for everyday wear and light athletic activities.', '2025-11-06 01:39:21', NULL, NULL, NULL, NULL),
-('13', 'SAMBA SHOES copy2', 110, 1, 'Giày thời trang', 'https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/51fa97b24eb5404b809c29a39a87fca4_9366/Sambae_Shoes_White_JI1349_01_standard.jpg', 'https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/a78262c770cd4f328ce7f2b14654bc59_9366/Sambae_Shoes_White_JI1349_02_standard_hover.jpg', 'samba.html', '6 out of 6 stars', 'Use code DEAL for an extra 30% off. Exclusions apply.', '4 interest-free payments available with Klarna. Learn More', 'Free shipping with Adiclun', '30 days returns and exchanges', 'True to size. We recommend ordering your usual size.', 'Premium quality shoes with comfortable fit and modern design. Perfect for everyday wear and light athletic activities.', '2025-11-06 01:39:21', NULL, NULL, NULL, NULL),
-('14', 'TOKYO SHOES copy2', 90, 1, 'Giày thể thao', 'https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/c3ed7e0662f747718a5a16fe34932d60_9366/Tokyo_Shoes_Green_JI3298_01_00_standard.jpg', 'https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/6e88efe72a8e4f20a05e8e58563d98b5_9366/Tokyo_Shoes_Green_JI3298_02_standard_hover.jpg', 'tokyo.html', '6 out of 6 stars', 'Use code DEAL for an extra 30% off. Exclusions apply.', '4 interest-free payments available with Klarna. Learn More', 'Free shipping with Adiclun', '30 days returns and exchanges', 'True to size. We recommend ordering your usual size.', 'Premium quality shoes with comfortable fit and modern design. Perfect for everyday wear and light athletic activities.', '2025-11-06 01:39:21', NULL, NULL, NULL, NULL),
-('15', 'Handball Spezial Shoes copy2', 110, 1, 'Giày thời trang', 'https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/6218f8cc55984cfe92d1a96d0110ac7e_9366/Handball_Spezial_Shoes_Black_DB3021_01_00_standard.jpg', 'https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/96c5eb48a9074ee9889aa96d0110ca89_9366/Handball_Spezial_Shoes_Black_DB3021_02_standard_hover.jpg', 'handball.html', '6 out of 6 stars', 'Use code DEAL for an extra 30% off. Exclusions apply.', '4 interest-free payments available with Klarna. Learn More', 'Free shipping with Adiclun', '30 days returns and exchanges', 'True to size. We recommend ordering your usual size.', 'Premium quality shoes with comfortable fit and modern design. Perfect for everyday wear and light athletic activities.', '2025-11-06 01:39:21', NULL, NULL, NULL, NULL),
-('16', 'Samba OG Shoes copy2', 100, 1, 'Giày thời trang', 'https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/4c70105150234ac4b948a8bf01187e0c_9366/Samba_OG_Shoes_Black_B75807_01_standard.jpg', 'https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/309a0c8f53dd45d3a3bea8bf0118aa6b_9366/Samba_OG_Shoes_Black_B75807_02_standard.jpg', 'real.html', '6 out of 6 stars', 'Use code DEAL for an extra 30% off. Exclusions apply.', '4 interest-free payments available with Klarna. Learn More', 'Free shipping with Adiclun', '30 days returns and exchanges', 'True to size. We recommend ordering your usual size.', 'Premium quality shoes with comfortable fit and modern design. Perfect for everyday wear and light athletic activities.', '2025-11-06 01:39:21', NULL, NULL, NULL, NULL),
-('1755139903141', 'test', 10000, 0, NULL, 'https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/c4a02015f9724a4a9391fdbded3d1b3e_9366/Arsenal_25-26_Third_Jersey_White_JI9556_21_model.jpg', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-11-06 01:39:21', NULL, NULL, NULL, NULL),
-('2', 'TOKYO SHOES', 90, 1, 'Giày thể thao', 'https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/c3ed7e0662f747718a5a16fe34932d60_9366/Tokyo_Shoes_Green_JI3298_01_00_standard.jpg', 'https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/6e88efe72a8e4f20a05e8e58563d98b5_9366/Tokyo_Shoes_Green_JI3298_02_standard_hover.jpg', 'tokyo.html', '6 out of 6 stars', 'Use code DEAL for an extra 30% off. Exclusions apply.', '4 interest-free payments available with Klarna. Learn More', 'Free shipping with Adiclun', '30 days returns and exchanges', 'True to size. We recommend ordering your usual size.', 'Premium quality shoes with comfortable fit and modern design. Perfect for everyday wear and light athletic activities.', '2025-11-06 01:39:21', NULL, NULL, NULL, NULL),
-('3', 'Handball Spezial Shoes', 110, 1, 'Giày thời trang', 'https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/6218f8cc55984cfe92d1a96d0110ac7e_9366/Handball_Spezial_Shoes_Black_DB3021_01_00_standard.jpg', 'https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/96c5eb48a9074ee9889aa96d0110ca89_9366/Handball_Spezial_Shoes_Black_DB3021_02_standard_hover.jpg', 'handball.html', '6 out of 6 stars', 'Use code DEAL for an extra 30% off. Exclusions apply.', '4 interest-free payments available with Klarna. Learn More', 'Free shipping with Adiclun', '30 days returns and exchanges', 'True to size. We recommend ordering your usual size.', 'Premium quality shoes with comfortable fit and modern design. Perfect for everyday wear and light athletic activities.', '2025-11-06 01:39:21', NULL, NULL, NULL, NULL),
-('4', 'Samba OG Shoes', 100, 1, 'Giày thời trang', 'https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/4c70105150234ac4b948a8bf01187e0c_9366/Samba_OG_Shoes_Black_B75807_01_standard.jpg', 'https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/309a0c8f53dd45d3a3bea8bf0118aa6b_9366/Samba_OG_Shoes_Black_B75807_02_standard.jpg', 'real.html', '6 out of 6 stars', 'Use code DEAL for an extra 30% off. Exclusions apply.', '4 interest-free payments available with Klarna. Learn More', 'Free shipping with Adiclun', '30 days returns and exchanges', 'True to size. We recommend ordering your usual size.', 'Premium quality shoes with comfortable fit and modern design. Perfect for everyday wear and light athletic activities.', '2025-11-06 01:39:21', NULL, NULL, NULL, NULL),
-('5', 'SAMBA SHOES copy', 110, 1, 'Giày thời trang', 'https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/51fa97b24eb5404b809c29a39a87fca4_9366/Sambae_Shoes_White_JI1349_01_standard.jpg', 'https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/a78262c770cd4f328ce7f2b14654bc59_9366/Sambae_Shoes_White_JI1349_02_standard_hover.jpg', 'samba.html', '6 out of 6 stars', 'Use code DEAL for an extra 30% off. Exclusions apply.', '4 interest-free payments available with Klarna. Learn More', 'Free shipping with Adiclun', '30 days returns and exchanges', 'True to size. We recommend ordering your usual size.', 'Premium quality shoes with comfortable fit and modern design. Perfect for everyday wear and light athletic activities.', '2025-11-06 01:39:21', NULL, NULL, NULL, NULL),
-('6', 'TOKYO SHOES copy', 90, 1, 'Giày thể thao', 'https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/c3ed7e0662f747718a5a16fe34932d60_9366/Tokyo_Shoes_Green_JI3298_01_00_standard.jpg', 'https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/6e88efe72a8e4f20a05e8e58563d98b5_9366/Tokyo_Shoes_Green_JI3298_02_standard_hover.jpg', 'tokyo.html', '6 out of 6 stars', 'Use code DEAL for an extra 30% off. Exclusions apply.', '4 interest-free payments available with Klarna. Learn More', 'Free shipping with Adiclun', '30 days returns and exchanges', 'True to size. We recommend ordering your usual size.', 'Premium quality shoes with comfortable fit and modern design. Perfect for everyday wear and light athletic activities.', '2025-11-06 01:39:21', NULL, NULL, NULL, NULL),
-('7', 'Handball Spezial Shoes copy', 110, 1, 'Giày thời trang', 'https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/6218f8cc55984cfe92d1a96d0110ac7e_9366/Handball_Spezial_Shoes_Black_DB3021_01_00_standard.jpg', 'https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/96c5eb48a9074ee9889aa96d0110ca89_9366/Handball_Spezial_Shoes_Black_DB3021_02_standard_hover.jpg', 'handball.html', '6 out of 6 stars', 'Use code DEAL for an extra 30% off. Exclusions apply.', '4 interest-free payments available with Klarna. Learn More', 'Free shipping with Adiclun', '30 days returns and exchanges', 'True to size. We recommend ordering your usual size.', 'Premium quality shoes with comfortable fit and modern design. Perfect for everyday wear and light athletic activities.', '2025-11-06 01:39:21', NULL, NULL, NULL, NULL),
-('8', 'Samba OG Shoes copy', 100, 1, 'Giày thời trang', 'https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/4c70105150234ac4b948a8bf01187e0c_9366/Samba_OG_Shoes_Black_B75807_01_standard.jpg', 'https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/309a0c8f53dd45d3a3bea8bf0118aa6b_9366/Samba_OG_Shoes_Black_B75807_02_standard.jpg', 'real.html', '6 out of 6 stars', 'Use code DEAL for an extra 30% off. Exclusions apply.', '4 interest-free payments available with Klarna. Learn More', 'Free shipping with Adiclun', '30 days returns and exchanges', 'True to size. We recommend ordering your usual size.', 'Premium quality shoes with comfortable fit and modern design. Perfect for everyday wear and light athletic activities.', '2025-11-06 01:39:21', NULL, NULL, NULL, NULL),
-('9', 'SAMBA SHOES copy1', 110, 1, 'Giày thời trang', 'https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/51fa97b24eb5404b809c29a39a87fca4_9366/Sambae_Shoes_White_JI1349_01_standard.jpg', 'https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/a78262c770cd4f328ce7f2b14654bc59_9366/Sambae_Shoes_White_JI1349_02_standard_hover.jpg', 'samba.html', '6 out of 6 stars', 'Use code DEAL for an extra 30% off. Exclusions apply.', '4 interest-free payments available with Klarna. Learn More', 'Free shipping with Adiclun', '30 days returns and exchanges', 'True to size. We recommend ordering your usual size.', 'Premium quality shoes with comfortable fit and modern design. Perfect for everyday wear and light athletic activities.', '2025-11-06 01:39:21', NULL, NULL, NULL, NULL);
+('1', 'SAMBA SHOES', 5000, 1, 'Giày thời trang', 'https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/51fa97b24eb5404b809c29a39a87fca4_9366/Sambae_Shoes_White_JI1349_01_standard.jpg', 'https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/a78262c770cd4f328ce7f2b14654bc59_9366/Sambae_Shoes_White_JI1349_02_standard_hover.jpg', 'samba.html', '6 out of 6 stars', 'Use code DEAL for an extra 30% off. Exclusions apply.', '4 interest-free payments available with Klarna. Learn More', 'Free shipping with Adiclun', '30 days returns and exchanges', 'True to size. We recommend ordering your usual size.', 'Premium quality shoes with comfortable fit and modern design. Perfect for everyday wear and light athletic activities.', '2025-11-06 01:39:21', NULL, NULL, NULL, NULL),
+('10', 'TOKYO SHOES copy1', 90000, 1, 'Giày thể thao', 'https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/c3ed7e0662f747718a5a16fe34932d60_9366/Tokyo_Shoes_Green_JI3298_01_00_standard.jpg', 'https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/6e88efe72a8e4f20a05e8e58563d98b5_9366/Tokyo_Shoes_Green_JI3298_02_standard_hover.jpg', 'tokyo.html', '6 out of 6 stars', 'Use code DEAL for an extra 30% off. Exclusions apply.', '4 interest-free payments available with Klarna. Learn More', 'Free shipping with Adiclun', '30 days returns and exchanges', 'True to size. We recommend ordering your usual size.', 'Premium quality shoes with comfortable fit and modern design. Perfect for everyday wear and light athletic activities.', '2025-11-06 01:39:21', NULL, NULL, NULL, NULL),
+('11', 'Handball Spezial Shoes copy1', 110000, 1, 'Giày thời trang', 'https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/6218f8cc55984cfe92d1a96d0110ac7e_9366/Handball_Spezial_Shoes_Black_DB3021_01_00_standard.jpg', 'https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/96c5eb48a9074ee9889aa96d0110ca89_9366/Handball_Spezial_Shoes_Black_DB3021_02_standard_hover.jpg', 'handball.html', '6 out of 6 stars', 'Use code DEAL for an extra 30% off. Exclusions apply.', '4 interest-free payments available with Klarna. Learn More', 'Free shipping with Adiclun', '30 days returns and exchanges', 'True to size. We recommend ordering your usual size.', 'Premium quality shoes with comfortable fit and modern design. Perfect for everyday wear and light athletic activities.', '2025-11-06 01:39:21', NULL, NULL, NULL, NULL),
+('12', 'Samba OG Shoes copy1', 100000, 1, 'Giày thời trang', 'https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/4c70105150234ac4b948a8bf01187e0c_9366/Samba_OG_Shoes_Black_B75807_01_standard.jpg', 'https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/309a0c8f53dd45d3a3bea8bf0118aa6b_9366/Samba_OG_Shoes_Black_B75807_02_standard.jpg', 'real.html', '6 out of 6 stars', 'Use code DEAL for an extra 30% off. Exclusions apply.', '4 interest-free payments available with Klarna. Learn More', 'Free shipping with Adiclun', '30 days returns and exchanges', 'True to size. We recommend ordering your usual size.', 'Premium quality shoes with comfortable fit and modern design. Perfect for everyday wear and light athletic activities.', '2025-11-06 01:39:21', NULL, NULL, NULL, NULL),
+('13', 'SAMBA SHOES copy2', 110000, 1, 'Giày thời trang', 'https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/51fa97b24eb5404b809c29a39a87fca4_9366/Sambae_Shoes_White_JI1349_01_standard.jpg', 'https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/a78262c770cd4f328ce7f2b14654bc59_9366/Sambae_Shoes_White_JI1349_02_standard_hover.jpg', 'samba.html', '6 out of 6 stars', 'Use code DEAL for an extra 30% off. Exclusions apply.', '4 interest-free payments available with Klarna. Learn More', 'Free shipping with Adiclun', '30 days returns and exchanges', 'True to size. We recommend ordering your usual size.', 'Premium quality shoes with comfortable fit and modern design. Perfect for everyday wear and light athletic activities.', '2025-11-06 01:39:21', NULL, NULL, NULL, NULL),
+('14', 'TOKYO SHOES copy2', 90000, 1, 'Giày thể thao', 'https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/c3ed7e0662f747718a5a16fe34932d60_9366/Tokyo_Shoes_Green_JI3298_01_00_standard.jpg', 'https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/6e88efe72a8e4f20a05e8e58563d98b5_9366/Tokyo_Shoes_Green_JI3298_02_standard_hover.jpg', 'tokyo.html', '6 out of 6 stars', 'Use code DEAL for an extra 30% off. Exclusions apply.', '4 interest-free payments available with Klarna. Learn More', 'Free shipping with Adiclun', '30 days returns and exchanges', 'True to size. We recommend ordering your usual size.', 'Premium quality shoes with comfortable fit and modern design. Perfect for everyday wear and light athletic activities.', '2025-11-06 01:39:21', NULL, NULL, NULL, NULL),
+('15', 'Handball Spezial Shoes copy2', 110000, 1, 'Giày thời trang', 'https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/6218f8cc55984cfe92d1a96d0110ac7e_9366/Handball_Spezial_Shoes_Black_DB3021_01_00_standard.jpg', 'https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/96c5eb48a9074ee9889aa96d0110ca89_9366/Handball_Spezial_Shoes_Black_DB3021_02_standard_hover.jpg', 'handball.html', '6 out of 6 stars', 'Use code DEAL for an extra 30% off. Exclusions apply.', '4 interest-free payments available with Klarna. Learn More', 'Free shipping with Adiclun', '30 days returns and exchanges', 'True to size. We recommend ordering your usual size.', 'Premium quality shoes with comfortable fit and modern design. Perfect for everyday wear and light athletic activities.', '2025-11-06 01:39:21', NULL, NULL, NULL, NULL),
+('16', 'Samba OG Shoes copy2', 100000, 1, 'Giày thời trang', 'https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/4c70105150234ac4b948a8bf01187e0c_9366/Samba_OG_Shoes_Black_B75807_01_standard.jpg', 'https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/309a0c8f53dd45d3a3bea8bf0118aa6b_9366/Samba_OG_Shoes_Black_B75807_02_standard.jpg', 'real.html', '6 out of 6 stars', 'Use code DEAL for an extra 30% off. Exclusions apply.', '4 interest-free payments available with Klarna. Learn More', 'Free shipping with Adiclun', '30 days returns and exchanges', 'True to size. We recommend ordering your usual size.', 'Premium quality shoes with comfortable fit and modern design. Perfect for everyday wear and light athletic activities.', '2025-11-06 01:39:21', NULL, NULL, NULL, NULL),
+('1755139903141', 'test', 10000000, 0, NULL, 'https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/c4a02015f9724a4a9391fdbded3d1b3e_9366/Arsenal_25-26_Third_Jersey_White_JI9556_21_model.jpg', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-11-06 01:39:21', NULL, NULL, NULL, NULL),
+('2', 'TOKYO SHOES', 90000, 1, 'Giày thể thao', 'https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/c3ed7e0662f747718a5a16fe34932d60_9366/Tokyo_Shoes_Green_JI3298_01_00_standard.jpg', 'https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/6e88efe72a8e4f20a05e8e58563d98b5_9366/Tokyo_Shoes_Green_JI3298_02_standard_hover.jpg', 'tokyo.html', '6 out of 6 stars', 'Use code DEAL for an extra 30% off. Exclusions apply.', '4 interest-free payments available with Klarna. Learn More', 'Free shipping with Adiclun', '30 days returns and exchanges', 'True to size. We recommend ordering your usual size.', 'Premium quality shoes with comfortable fit and modern design. Perfect for everyday wear and light athletic activities.', '2025-11-06 01:39:21', NULL, NULL, NULL, NULL),
+('3', 'Handball Spezial Shoes', 110000, 1, 'Giày thời trang', 'https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/6218f8cc55984cfe92d1a96d0110ac7e_9366/Handball_Spezial_Shoes_Black_DB3021_01_00_standard.jpg', 'https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/96c5eb48a9074ee9889aa96d0110ca89_9366/Handball_Spezial_Shoes_Black_DB3021_02_standard_hover.jpg', 'handball.html', '6 out of 6 stars', 'Use code DEAL for an extra 30% off. Exclusions apply.', '4 interest-free payments available with Klarna. Learn More', 'Free shipping with Adiclun', '30 days returns and exchanges', 'True to size. We recommend ordering your usual size.', 'Premium quality shoes with comfortable fit and modern design. Perfect for everyday wear and light athletic activities.', '2025-11-06 01:39:21', NULL, NULL, NULL, NULL),
+('4', 'Samba OG Shoes', 100000, 1, 'Giày thời trang', 'https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/4c70105150234ac4b948a8bf01187e0c_9366/Samba_OG_Shoes_Black_B75807_01_standard.jpg', 'https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/309a0c8f53dd45d3a3bea8bf0118aa6b_9366/Samba_OG_Shoes_Black_B75807_02_standard.jpg', 'real.html', '6 out of 6 stars', 'Use code DEAL for an extra 30% off. Exclusions apply.', '4 interest-free payments available with Klarna. Learn More', 'Free shipping with Adiclun', '30 days returns and exchanges', 'True to size. We recommend ordering your usual size.', 'Premium quality shoes with comfortable fit and modern design. Perfect for everyday wear and light athletic activities.', '2025-11-06 01:39:21', NULL, NULL, NULL, NULL),
+('5', 'SAMBA SHOES copy', 110000, 1, 'Giày thời trang', 'https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/51fa97b24eb5404b809c29a39a87fca4_9366/Sambae_Shoes_White_JI1349_01_standard.jpg', 'https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/a78262c770cd4f328ce7f2b14654bc59_9366/Sambae_Shoes_White_JI1349_02_standard_hover.jpg', 'samba.html', '6 out of 6 stars', 'Use code DEAL for an extra 30% off. Exclusions apply.', '4 interest-free payments available with Klarna. Learn More', 'Free shipping with Adiclun', '30 days returns and exchanges', 'True to size. We recommend ordering your usual size.', 'Premium quality shoes with comfortable fit and modern design. Perfect for everyday wear and light athletic activities.', '2025-11-06 01:39:21', NULL, NULL, NULL, NULL),
+('6', 'TOKYO SHOES copy', 90000, 1, 'Giày thể thao', 'https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/c3ed7e0662f747718a5a16fe34932d60_9366/Tokyo_Shoes_Green_JI3298_01_00_standard.jpg', 'https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/6e88efe72a8e4f20a05e8e58563d98b5_9366/Tokyo_Shoes_Green_JI3298_02_standard_hover.jpg', 'tokyo.html', '6 out of 6 stars', 'Use code DEAL for an extra 30% off. Exclusions apply.', '4 interest-free payments available with Klarna. Learn More', 'Free shipping with Adiclun', '30 days returns and exchanges', 'True to size. We recommend ordering your usual size.', 'Premium quality shoes with comfortable fit and modern design. Perfect for everyday wear and light athletic activities.', '2025-11-06 01:39:21', NULL, NULL, NULL, NULL),
+('7', 'Handball Spezial Shoes copy', 110000, 1, 'Giày thời trang', 'https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/6218f8cc55984cfe92d1a96d0110ac7e_9366/Handball_Spezial_Shoes_Black_DB3021_01_00_standard.jpg', 'https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/96c5eb48a9074ee9889aa96d0110ca89_9366/Handball_Spezial_Shoes_Black_DB3021_02_standard_hover.jpg', 'handball.html', '6 out of 6 stars', 'Use code DEAL for an extra 30% off. Exclusions apply.', '4 interest-free payments available with Klarna. Learn More', 'Free shipping with Adiclun', '30 days returns and exchanges', 'True to size. We recommend ordering your usual size.', 'Premium quality shoes with comfortable fit and modern design. Perfect for everyday wear and light athletic activities.', '2025-11-06 01:39:21', NULL, NULL, NULL, NULL),
+('8', 'Samba OG Shoes copy', 100000, 1, 'Giày thời trang', 'https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/4c70105150234ac4b948a8bf01187e0c_9366/Samba_OG_Shoes_Black_B75807_01_standard.jpg', 'https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/309a0c8f53dd45d3a3bea8bf0118aa6b_9366/Samba_OG_Shoes_Black_B75807_02_standard.jpg', 'real.html', '6 out of 6 stars', 'Use code DEAL for an extra 30% off. Exclusions apply.', '4 interest-free payments available with Klarna. Learn More', 'Free shipping with Adiclun', '30 days returns and exchanges', 'True to size. We recommend ordering your usual size.', 'Premium quality shoes with comfortable fit and modern design. Perfect for everyday wear and light athletic activities.', '2025-11-06 01:39:21', NULL, NULL, NULL, NULL),
+('9', 'SAMBA SHOES copy1', 110000, 1, 'Giày thời trang', 'https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/51fa97b24eb5404b809c29a39a87fca4_9366/Sambae_Shoes_White_JI1349_01_standard.jpg', 'https://assets.adidas.com/images/h_2000,f_auto,q_auto,fl_lossy,c_fill,g_auto/a78262c770cd4f328ce7f2b14654bc59_9366/Sambae_Shoes_White_JI1349_02_standard_hover.jpg', 'samba.html', '6 out of 6 stars', 'Use code DEAL for an extra 30% off. Exclusions apply.', '4 interest-free payments available with Klarna. Learn More', 'Free shipping with Adiclun', '30 days returns and exchanges', 'True to size. We recommend ordering your usual size.', 'Premium quality shoes with comfortable fit and modern design. Perfect for everyday wear and light athletic activities.', '2025-11-06 01:39:21', NULL, NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `product_colors`
+-- Cấu trúc bảng cho bảng `product_colors`
 --
 
+DROP TABLE IF EXISTS `product_colors`;
 CREATE TABLE `product_colors` (
-  `id` bigint NOT NULL,
-  `product_id` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `color_name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `image_url` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `color` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL
+  `id` bigint(20) NOT NULL,
+  `product_id` varchar(50) DEFAULT NULL,
+  `color_name` varchar(255) NOT NULL,
+  `image_url` varchar(255) DEFAULT NULL,
+  `color` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Dumping data for table `product_colors`
+-- Đang đổ dữ liệu cho bảng `product_colors`
 --
 
 INSERT INTO `product_colors` (`id`, `product_id`, `color_name`, `image_url`, `color`) VALUES
@@ -336,18 +403,19 @@ INSERT INTO `product_colors` (`id`, `product_id`, `color_name`, `image_url`, `co
 -- --------------------------------------------------------
 
 --
--- Table structure for table `product_images`
+-- Cấu trúc bảng cho bảng `product_images`
 --
 
+DROP TABLE IF EXISTS `product_images`;
 CREATE TABLE `product_images` (
-  `id` bigint NOT NULL,
-  `product_id` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `image_url` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `image_order` int DEFAULT '0'
+  `id` bigint(20) NOT NULL,
+  `product_id` varchar(50) DEFAULT NULL,
+  `image_url` varchar(255) DEFAULT NULL,
+  `image_order` int(11) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Dumping data for table `product_images`
+-- Đang đổ dữ liệu cho bảng `product_images`
 --
 
 INSERT INTO `product_images` (`id`, `product_id`, `image_url`, `image_order`) VALUES
@@ -372,18 +440,19 @@ INSERT INTO `product_images` (`id`, `product_id`, `image_url`, `image_order`) VA
 -- --------------------------------------------------------
 
 --
--- Table structure for table `product_sizes`
+-- Cấu trúc bảng cho bảng `product_sizes`
 --
 
+DROP TABLE IF EXISTS `product_sizes`;
 CREATE TABLE `product_sizes` (
-  `id` bigint NOT NULL,
-  `product_id` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `size_value` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `size` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL
+  `id` bigint(20) NOT NULL,
+  `product_id` varchar(50) DEFAULT NULL,
+  `size_value` varchar(255) NOT NULL,
+  `size` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Dumping data for table `product_sizes`
+-- Đang đổ dữ liệu cho bảng `product_sizes`
 --
 
 INSERT INTO `product_sizes` (`id`, `product_id`, `size_value`, `size`) VALUES
@@ -638,18 +707,19 @@ INSERT INTO `product_sizes` (`id`, `product_id`, `size_value`, `size`) VALUES
 -- --------------------------------------------------------
 
 --
--- Table structure for table `product_videos`
+-- Cấu trúc bảng cho bảng `product_videos`
 --
 
+DROP TABLE IF EXISTS `product_videos`;
 CREATE TABLE `product_videos` (
-  `id` bigint NOT NULL,
-  `product_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `video_url` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `video_order` int DEFAULT '0'
+  `id` bigint(20) NOT NULL,
+  `product_id` varchar(50) NOT NULL,
+  `video_url` varchar(255) NOT NULL,
+  `video_order` int(11) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Dumping data for table `product_videos`
+-- Đang đổ dữ liệu cho bảng `product_videos`
 --
 
 INSERT INTO `product_videos` (`id`, `product_id`, `video_url`, `video_order`) VALUES
@@ -663,53 +733,90 @@ INSERT INTO `product_videos` (`id`, `product_id`, `video_url`, `video_order`) VA
 -- --------------------------------------------------------
 
 --
--- Table structure for table `users`
+-- Cấu trúc bảng cho bảng `users`
 --
 
+DROP TABLE IF EXISTS `users`;
 CREATE TABLE `users` (
-  `id` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `email` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `password` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `is_admin` tinyint(1) DEFAULT '0',
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP
+  `id` varchar(50) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `is_admin` tinyint(1) DEFAULT 0,
+  `created_at` timestamp NULL DEFAULT current_timestamp(),
+  `account_locked_until` datetime(6) DEFAULT NULL,
+  `email_verification_expires` datetime(6) DEFAULT NULL,
+  `email_verification_token` varchar(255) DEFAULT NULL,
+  `email_verified` bit(1) DEFAULT NULL,
+  `is_2fa_enabled` bit(1) DEFAULT NULL,
+  `last_login` datetime(6) DEFAULT NULL,
+  `login_attempts` int(11) DEFAULT NULL,
+  `password_changed_at` datetime(6) DEFAULT NULL,
+  `password_reset_expires` datetime(6) DEFAULT NULL,
+  `password_reset_token` varchar(255) DEFAULT NULL,
+  `two_factor_secret` varchar(255) DEFAULT NULL,
+  `updated_at` datetime(6) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Dumping data for table `users`
+-- Đang đổ dữ liệu cho bảng `users`
 --
 
-INSERT INTO `users` (`id`, `name`, `email`, `password`, `is_admin`, `created_at`) VALUES
-('1', 'Admin User', 'k336655@gmail.com', 'k336655', 1, '2025-11-06 01:39:21'),
-('1621', 'chi', 'chi@gmail.com', 'chi123', 0, '2025-11-06 01:39:21'),
-('1ac8', 'Dung', 'Dung123@gg.cc', '123', 0, '2025-11-06 01:39:21'),
-('1bf4', 'test', 't@gmail.com', 't123', 0, '2025-11-06 01:39:21'),
-('4927', 'q', 'q@q.q', 'q', 0, '2025-11-06 01:39:21'),
-('4c32', 'r', 'r@r.r', 'r', 0, '2025-11-06 01:39:21'),
-('66f2', 'k', 'k11@gmail.com', 'k11', 0, '2025-11-06 01:39:21'),
-('7b8f', 'test', 'test@gmail.com', 'test123', 0, '2025-11-06 01:39:21'),
-('a470', 'Dun', 'Dung@h.h', '123', 0, '2025-11-06 01:39:21'),
-('be00', 'eee', 'eee@e.e', 'eee', 0, '2025-11-06 01:39:21'),
-('bfab', 'k', 'k123@gmail.com', 'k123', 0, '2025-11-06 01:39:21'),
-('c2b5', 'khoa', 'khoa@gmail.com', 'khoa123', 0, '2025-11-06 01:39:21'),
-('cd28', 'hhh', 'hhh@gmail.com', 'hhh123', 0, '2025-11-06 01:39:21'),
-('da5e', 'ee', 'ee@e.e', 'ee', 0, '2025-11-06 01:39:21'),
-('dc45', 'll', 'll@gmail.com', 'll123', 0, '2025-11-06 01:39:21'),
-('e1a3', 'lala', 'lala123@gmail.com', 'lala123', 0, '2025-11-06 01:39:21');
+INSERT INTO `users` (`id`, `name`, `email`, `password`, `is_admin`, `created_at`, `account_locked_until`, `email_verification_expires`, `email_verification_token`, `email_verified`, `is_2fa_enabled`, `last_login`, `login_attempts`, `password_changed_at`, `password_reset_expires`, `password_reset_token`, `two_factor_secret`, `updated_at`) VALUES
+('1', 'Admin User', 'k336655@gmail.com', 'k336655', 1, '2025-11-06 01:39:21', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+('1621', 'chi', 'chi@gmail.com', 'chi123', 0, '2025-11-06 01:39:21', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+('1ac8', 'Dung', 'Dung123@gg.cc', '123', 0, '2025-11-06 01:39:21', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+('1bf4', 'test', 't@gmail.com', 't123', 0, '2025-11-06 01:39:21', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+('26de9f53', 'hai', 'dhai85159@gmail.com', 'hai112005@', 0, '2025-11-23 05:39:33', NULL, '2025-11-24 12:39:33.000000', '96ffc4e7-c406-40bb-aeab-28b0cce86be5', b'1', b'0', '2025-11-23 12:41:17.000000', 0, NULL, NULL, NULL, NULL, '2025-11-23 12:41:17.000000'),
+('4927', 'q', 'q@q.q', 'q', 0, '2025-11-06 01:39:21', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+('4c32', 'r', 'r@r.r', 'r', 0, '2025-11-06 01:39:21', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+('66f2', 'k', 'k11@gmail.com', 'k11', 0, '2025-11-06 01:39:21', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+('7b8f', 'test', 'test@gmail.com', 'test123', 0, '2025-11-06 01:39:21', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+('a470', 'Dun', 'Dung@h.h', '123', 0, '2025-11-06 01:39:21', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+('be00', 'eee', 'eee@e.e', 'eee', 0, '2025-11-06 01:39:21', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+('bfab', 'k', 'k123@gmail.com', 'k123', 0, '2025-11-06 01:39:21', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+('c2b5', 'khoa', 'khoa@gmail.com', 'khoa123', 0, '2025-11-06 01:39:21', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+('cd28', 'hhh', 'hhh@gmail.com', 'hhh123', 0, '2025-11-06 01:39:21', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+('da5e', 'ee', 'ee@e.e', 'ee', 0, '2025-11-06 01:39:21', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+('dc45', 'll', 'll@gmail.com', 'll123', 0, '2025-11-06 01:39:21', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+('e1a3', 'lala', 'lala123@gmail.com', 'lala123', 0, '2025-11-06 01:39:21', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+
+-- --------------------------------------------------------
 
 --
--- Indexes for dumped tables
+-- Cấu trúc bảng cho bảng `vouchers`
+--
+
+DROP TABLE IF EXISTS `vouchers`;
+CREATE TABLE `vouchers` (
+  `id` bigint(20) NOT NULL,
+  `active` bit(1) DEFAULT NULL,
+  `code` varchar(50) NOT NULL,
+  `created_at` datetime(6) DEFAULT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `discount_type` varchar(20) NOT NULL,
+  `discount_value` double NOT NULL,
+  `end_date` datetime(6) DEFAULT NULL,
+  `max_discount` double DEFAULT NULL,
+  `min_order_value` double DEFAULT NULL,
+  `start_date` datetime(6) DEFAULT NULL,
+  `usage_limit` int(11) DEFAULT NULL,
+  `used_count` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Chỉ mục cho các bảng đã đổ
 --
 
 --
--- Indexes for table `cart`
+-- Chỉ mục cho bảng `cart`
 --
 ALTER TABLE `cart`
   ADD PRIMARY KEY (`id`),
   ADD KEY `user_id` (`user_id`);
 
 --
--- Indexes for table `cart_items`
+-- Chỉ mục cho bảng `cart_items`
 --
 ALTER TABLE `cart_items`
   ADD PRIMARY KEY (`id`),
@@ -717,13 +824,13 @@ ALTER TABLE `cart_items`
   ADD KEY `product_id` (`product_id`);
 
 --
--- Indexes for table `collections`
+-- Chỉ mục cho bảng `collections`
 --
 ALTER TABLE `collections`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indexes for table `favorites`
+-- Chỉ mục cho bảng `favorites`
 --
 ALTER TABLE `favorites`
   ADD PRIMARY KEY (`id`),
@@ -731,7 +838,7 @@ ALTER TABLE `favorites`
   ADD KEY `product_id` (`product_id`);
 
 --
--- Indexes for table `orders`
+-- Chỉ mục cho bảng `orders`
 --
 ALTER TABLE `orders`
   ADD PRIMARY KEY (`id`),
@@ -739,7 +846,7 @@ ALTER TABLE `orders`
   ADD KEY `idx_orders_user_id` (`user_id`);
 
 --
--- Indexes for table `order_items`
+-- Chỉ mục cho bảng `order_items`
 --
 ALTER TABLE `order_items`
   ADD PRIMARY KEY (`id`),
@@ -747,13 +854,13 @@ ALTER TABLE `order_items`
   ADD KEY `product_id` (`product_id`);
 
 --
--- Indexes for table `posts`
+-- Chỉ mục cho bảng `posts`
 --
 ALTER TABLE `posts`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indexes for table `products`
+-- Chỉ mục cho bảng `products`
 --
 ALTER TABLE `products`
   ADD PRIMARY KEY (`id`),
@@ -762,35 +869,35 @@ ALTER TABLE `products`
   ADD KEY `idx_products_price` (`price`);
 
 --
--- Indexes for table `product_colors`
+-- Chỉ mục cho bảng `product_colors`
 --
 ALTER TABLE `product_colors`
   ADD PRIMARY KEY (`id`),
   ADD KEY `idx_product_colors_product_id` (`product_id`);
 
 --
--- Indexes for table `product_images`
+-- Chỉ mục cho bảng `product_images`
 --
 ALTER TABLE `product_images`
   ADD PRIMARY KEY (`id`),
   ADD KEY `idx_product_images_product_id` (`product_id`);
 
 --
--- Indexes for table `product_sizes`
+-- Chỉ mục cho bảng `product_sizes`
 --
 ALTER TABLE `product_sizes`
   ADD PRIMARY KEY (`id`),
   ADD KEY `idx_product_sizes_product_id` (`product_id`);
 
 --
--- Indexes for table `product_videos`
+-- Chỉ mục cho bảng `product_videos`
 --
 ALTER TABLE `product_videos`
   ADD PRIMARY KEY (`id`),
   ADD KEY `idx_product_videos_product_id` (`product_id`);
 
 --
--- Indexes for table `users`
+-- Chỉ mục cho bảng `users`
 --
 ALTER TABLE `users`
   ADD PRIMARY KEY (`id`),
@@ -798,108 +905,121 @@ ALTER TABLE `users`
   ADD KEY `idx_users_email` (`email`);
 
 --
--- AUTO_INCREMENT for dumped tables
+-- Chỉ mục cho bảng `vouchers`
+--
+ALTER TABLE `vouchers`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `UK30ftp2biebbvpik8e49wlmady` (`code`);
+
+--
+-- AUTO_INCREMENT cho các bảng đã đổ
 --
 
 --
--- AUTO_INCREMENT for table `cart_items`
+-- AUTO_INCREMENT cho bảng `cart_items`
 --
 ALTER TABLE `cart_items`
-  MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
--- AUTO_INCREMENT for table `favorites`
+-- AUTO_INCREMENT cho bảng `favorites`
 --
 ALTER TABLE `favorites`
-  MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
--- AUTO_INCREMENT for table `order_items`
+-- AUTO_INCREMENT cho bảng `order_items`
 --
 ALTER TABLE `order_items`
-  MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
 
 --
--- AUTO_INCREMENT for table `product_colors`
+-- AUTO_INCREMENT cho bảng `product_colors`
 --
 ALTER TABLE `product_colors`
-  MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=69;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=69;
 
 --
--- AUTO_INCREMENT for table `product_images`
+-- AUTO_INCREMENT cho bảng `product_images`
 --
 ALTER TABLE `product_images`
-  MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
--- AUTO_INCREMENT for table `product_sizes`
+-- AUTO_INCREMENT cho bảng `product_sizes`
 --
 ALTER TABLE `product_sizes`
-  MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=248;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=248;
 
 --
--- AUTO_INCREMENT for table `product_videos`
+-- AUTO_INCREMENT cho bảng `product_videos`
 --
 ALTER TABLE `product_videos`
-  MODIFY `id` bigint NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
--- Constraints for dumped tables
+-- AUTO_INCREMENT cho bảng `vouchers`
+--
+ALTER TABLE `vouchers`
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+
+--
+-- Các ràng buộc cho các bảng đã đổ
 --
 
 --
--- Constraints for table `cart`
+-- Các ràng buộc cho bảng `cart`
 --
 ALTER TABLE `cart`
   ADD CONSTRAINT `cart_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
 
 --
--- Constraints for table `cart_items`
+-- Các ràng buộc cho bảng `cart_items`
 --
 ALTER TABLE `cart_items`
   ADD CONSTRAINT `cart_items_ibfk_1` FOREIGN KEY (`cart_id`) REFERENCES `cart` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `cart_items_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`);
 
 --
--- Constraints for table `favorites`
+-- Các ràng buộc cho bảng `favorites`
 --
 ALTER TABLE `favorites`
   ADD CONSTRAINT `favorites_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
   ADD CONSTRAINT `favorites_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`);
 
 --
--- Constraints for table `orders`
+-- Các ràng buộc cho bảng `orders`
 --
 ALTER TABLE `orders`
   ADD CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
 
 --
--- Constraints for table `order_items`
+-- Các ràng buộc cho bảng `order_items`
 --
 ALTER TABLE `order_items`
   ADD CONSTRAINT `order_items_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `order_items_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`);
 
 --
--- Constraints for table `product_colors`
+-- Các ràng buộc cho bảng `product_colors`
 --
 ALTER TABLE `product_colors`
   ADD CONSTRAINT `product_colors_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `product_images`
+-- Các ràng buộc cho bảng `product_images`
 --
 ALTER TABLE `product_images`
   ADD CONSTRAINT `product_images_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `product_sizes`
+-- Các ràng buộc cho bảng `product_sizes`
 --
 ALTER TABLE `product_sizes`
   ADD CONSTRAINT `product_sizes_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `product_videos`
+-- Các ràng buộc cho bảng `product_videos`
 --
 ALTER TABLE `product_videos`
   ADD CONSTRAINT `product_videos_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE;

@@ -2,8 +2,11 @@
   <div v-if="show" class="cart-modal-overlay" @click.self="close">
     <div class="cart-modal">
       <h2>Giỏ hàng</h2>
+      
       <div v-if="cartStore.loading" class="loading">Đang tải giỏ hàng...</div>
+      
       <div v-else-if="cartStore.items.length === 0">Giỏ hàng trống</div>
+      
       <div v-else>
         <div v-for="item in cartStore.items" :key="item.id" class="cart-item">
           <img :src="item.image" :alt="item.productName" class="cart-item-img" />
@@ -14,12 +17,14 @@
               <span v-if="item.sizeValue">Size: {{ item.sizeValue }}</span>
             </div>
             <div class="cart-item-price">{{ formatPrice(item.price) }}</div>
+            
             <div class="cart-item-qty">
               <button @click="decreaseQty(item)" :disabled="cartStore.loading">-</button>
               <span>{{ item.quantity }}</span>
               <button @click="increaseQty(item)" :disabled="cartStore.loading">+</button>
             </div>
           </div>
+          
           <button 
             class="cart-item-remove" 
             @click="removeItem(item)"
@@ -28,24 +33,25 @@
             {{ cartStore.loading ? '...' : 'Xóa' }}
           </button>
         </div>
+
         <div class="cart-total">
           <span>Tổng tiền:</span>
           <span class="cart-total-value">{{ formatPrice(cartStore.totalPrice) }}</span>
         </div>
       </div>
+
       <div class="cart-actions">
         <button 
-          v-if="cartStore.items.length > 0" 
           class="checkout-btn" 
           @click="checkout"
-          :disabled="cartStore.loading"
+          :disabled="cartStore.items.length === 0"
         >
           Thanh toán
         </button>
+        
         <button class="cart-modal-close" @click="close">Đóng</button>
       </div>
 
-      <!-- Hiển thị lỗi nếu có -->
       <div v-if="cartStore.error" class="error-message">
         {{ cartStore.error }}
       </div>
@@ -70,7 +76,6 @@ export default {
   },
   data() {
     return {
-      // Biến cục bộ cho các trạng thái loading riêng lẻ (nếu cần)
       processingItemId: null
     };
   },
@@ -94,71 +99,47 @@ export default {
     },
 
     async fetchCart() {
-      // Kiểm tra đăng nhập trước
       if (!this.cartStore.isLoggedIn) {
-        console.warn('User not logged in, cannot fetch cart');
-        this.$emit('error', 'Vui lòng đăng nhập để xem giỏ hàng');
         return;
       }
-
       try {
         await this.cartStore.fetchCart();
       } catch (error) {
-        console.error('Lỗi khi tải giỏ hàng:', error);
-        this.$emit('error', 'Không thể tải giỏ hàng');
+        console.error('Lỗi tải giỏ hàng:', error);
       }
     },
 
     async increaseQty(item) {
-      this.processingItemId = item.id;
       try {
         await this.cartStore.increaseQty(item);
       } catch (error) {
-        console.error('Lỗi khi tăng số lượng:', error);
-        this.$emit('error', 'Không thể cập nhật số lượng');
-      } finally {
-        this.processingItemId = null;
+        console.error('Lỗi tăng số lượng:', error);
       }
     },
 
     async decreaseQty(item) {
-      this.processingItemId = item.id;
       try {
         await this.cartStore.decreaseQty(item);
       } catch (error) {
-        console.error('Lỗi khi giảm số lượng:', error);
-        this.$emit('error', 'Không thể cập nhật số lượng');
-      } finally {
-        this.processingItemId = null;
+        console.error('Lỗi giảm số lượng:', error);
       }
     },
 
     async removeItem(item) {
-      this.processingItemId = item.id;
       try {
         await this.cartStore.removeItem(item);
       } catch (error) {
-        console.error('Lỗi khi xóa sản phẩm:', error);
-        this.$emit('error', 'Không thể xóa sản phẩm');
-      } finally {
-        this.processingItemId = null;
+        console.error('Lỗi xóa sản phẩm:', error);
       }
     },
 
-    async checkout() {
-      try {
-        // Xóa giỏ hàng
-        await this.cartStore.clearCart();
-        
-        this.$emit('checkout-success');
-        this.close();
-        
-        // Chuyển hướng đến trang thanh toán
-        this.$router.push('/checkout');
-      } catch (error) {
-        console.error('Lỗi khi thanh toán:', error);
-        this.$emit('error', 'Không thể xử lý thanh toán');
-      }
+    // --- ĐÃ SỬA: Hàm checkout đơn giản hóa ---
+    checkout() {
+      // 1. Đóng modal giỏ hàng
+      this.close();
+      
+      // 2. Chuyển hướng thẳng đến trang checkout mà không kiểm tra hay xóa store
+      this.$router.push('/checkout');
     },
 
     close() {
@@ -313,6 +294,7 @@ export default {
 .checkout-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+  background: #ccc;
 }
 
 .cart-modal-close {
