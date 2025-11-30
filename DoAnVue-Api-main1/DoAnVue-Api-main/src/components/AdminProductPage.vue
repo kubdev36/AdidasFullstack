@@ -6,10 +6,6 @@
       <button @click="openModal('add')" class="add-btn">
         <i class="fas fa-plus"></i> Thêm Sản Phẩm Mới
       </button>
-
-      <button @click="goToVoucher" class="add-btn">
-        <i class="fas fa-ticket-alt"></i> Quản Lý Voucher
-      </button>
     </div>
 
     <div v-if="loading" class="loading">
@@ -172,7 +168,6 @@
 import { ref, computed, onMounted } from "vue";
 import { useProductStore } from "@/stores/productStore";
 import AppHeader from "./AppHeader.vue";
-import { useRouter } from "vue-router";
 
 const productStore = useProductStore();
 const isModalOpen = ref(false);
@@ -336,11 +331,6 @@ const deleteProduct = async (id) => {
       alert(errorMessage);
     }
   }
-};
-const router = useRouter();
-
-const goToVoucher = () => {
-  router.push('/admin/vouchers');
 };
 
 const viewProductDetails = (id) => {

@@ -185,10 +185,18 @@ const testConnection = async () => {
     const response = await axios.get(`${API_BASE_URL}/check-email?email=test@test.com`, {
       timeout: 5000
     });
+    // Giả lập gán token mặc định cho mục đích demo
+    localStorage.setItem('authToken', 'TOKEN_MAC_DINH_DEMO_123456');
     
+    // Nếu muốn giả lập lưu cả thông tin user ảo luôn thì thêm dòng này:
+    localStorage.setItem('userLogin', JSON.stringify({ name: 'Tester', email: 'test@demo.com' }));
+    
+    console.log('✅ Đã gán token mặc định vào localStorage!');
+
     connectionStatus.value = '✅ Kết nối backend thành công!';
     lastResponse.value = JSON.stringify(response.data, null, 2);
     console.log('✅ Backend connection test:', response.data);
+    
     
   } catch (err) {
     connectionStatus.value = '❌ Không thể kết nối đến backend!';

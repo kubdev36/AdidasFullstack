@@ -166,7 +166,7 @@
           </li>
 
           <li class="favorite-icon-item">
-            <router-link to="/favoritesPage" class="icon-link">
+            <router-link to="/favorites" class="icon-link">
               <i class="fa-solid fa-heart heart-icon"></i>
             </router-link>
           </li>

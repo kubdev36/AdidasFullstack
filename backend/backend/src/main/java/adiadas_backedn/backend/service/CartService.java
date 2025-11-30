@@ -1,9 +1,10 @@
 package adiadas_backedn.backend.service;
 
-
+ // Đảm bảo import đúng DTO response
 import adiadas_backedn.backend.model.*;
 import adiadas_backedn.backend.repository.CartItemRepository;
 import adiadas_backedn.backend.repository.CartRepository;
+import adiadas_backedn.backend.repository.ProductRepository; // 🔥 Import thêm
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +24,9 @@ public class CartService {
 
     @Autowired
     private CartItemRepository cartItemRepository;
+
+    @Autowired
+    private ProductRepository productRepository; // 🔥 Cần cái này để tìm Product
 
     public CartResponse getCartByUserId(String userId) {
         Cart cart = cartRepository.findByUserIdWithItems(userId)
@@ -45,17 +49,29 @@ public class CartService {
             item.setQuantity(item.getQuantity() + itemRequest.getQuantity());
             cartItemRepository.save(item);
         } else {
-            // Add new item
-            CartItem newItem = new CartItem(
-                    itemRequest.getProductId(),
-                    itemRequest.getProductName(),
-                    itemRequest.getImage(),
-                    itemRequest.getPrice(),
-                    itemRequest.getColorName(),
-                    itemRequest.getSizeValue(),
-                    itemRequest.getQuantity()
-            );
+            // 🔥 SỬA LẠI LOGIC TẠO MỚI ITEM TẠI ĐÂY
+
+            // 1. Tìm Product từ Database trước
+            Product product = productRepository.findById(itemRequest.getProductId())
+                    .orElseThrow(() -> new RuntimeException("Product not found: " + itemRequest.getProductId()));
+
+            // 2. Tạo CartItem bằng Constructor rỗng và Setter (An toàn nhất)
+            CartItem newItem = new CartItem();
+            newItem.setProduct(product); // Gán Object Product vào
+            newItem.setProductName(itemRequest.getProductName());
+            newItem.setImage(itemRequest.getImage());
+
+            // Convert giá từ Double/String sang BigDecimal nếu cần
+            // Giả sử itemRequest.getPrice() trả về BigDecimal thì gán thẳng
+            // Nếu trả về Double thì dùng: BigDecimal.valueOf(itemRequest.getPrice())
+            newItem.setPrice(itemRequest.getPrice());
+
+            newItem.setColorName(itemRequest.getColorName());
+            newItem.setSizeValue(itemRequest.getSizeValue());
+            newItem.setQuantity(itemRequest.getQuantity());
             newItem.setCart(cart);
+
+            // 3. Thêm vào danh sách
             cart.getCartItems().add(newItem);
         }
 
@@ -76,7 +92,6 @@ public class CartService {
                 .orElseThrow(() -> new RuntimeException("Item not found in cart"));
 
         if (quantity <= 0) {
-            // Remove item if quantity is 0 or negative
             cart.getCartItems().remove(item);
             cartItemRepository.delete(item);
         } else {
@@ -98,7 +113,7 @@ public class CartService {
         cartItemRepository.deleteByCartIdAndProductIdAndColorNameAndSizeValue(
                 cart.getId(), productId, colorName, sizeValue);
 
-        // Refresh cart to get updated items
+        // Refresh cart
         cart = cartRepository.findByUserIdWithItems(userId)
                 .orElseThrow(() -> new RuntimeException("Cart not found"));
 
@@ -127,7 +142,7 @@ public class CartService {
         List<CartItemResponse> itemResponses = cart.getCartItems().stream()
                 .map(item -> new CartItemResponse(
                         item.getId(),
-                        item.getProductId(),
+                        item.getProduct().getId(), // 🔥 Lấy ID từ object Product
                         item.getProductName(),
                         item.getImage(),
                         item.getPrice(),
