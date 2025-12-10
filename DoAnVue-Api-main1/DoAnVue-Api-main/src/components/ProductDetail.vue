@@ -8,40 +8,31 @@
 		</div>
 
 		<div class="content">
-      <div class="product">
-        <!-- ẢNH CHÍNH: chỉ hiển thị màu đang chọn, nếu chưa chọn thì dùng ảnh sản phẩm -->
-        <img
-            :src="selectedColorImage || product.image"
-            :alt="product.name"
-        />
+			<div class="product">
+				<!-- Hiển thị ảnh chính -->
+				<img :src="selectedColorImage || product.image" :alt="product.name" />
 
-        <!-- Video đầu tiên nếu có -->
-        <video
-            v-if="firstVideo"
-            :src="firstVideo.videoUrl"
-            autoplay
-            muted
-            loop
-        ></video>
+				<!-- Hiển thị video đầu tiên nếu có (đã sắp xếp theo thứ tự) -->
+				<video
+					v-if="firstVideo"
+					:src="firstVideo.videoUrl"
+					autoplay
+					muted
+					loop
+				></video>
+				<!-- Hoặc hiển thị hover image nếu có -->
+				<img v-else-if="product.hoverImage" :src="product.hoverImage" :alt="product.name + ' hover'" />
 
-        <!-- Hover image nếu không có video -->
-        <img
-            v-else-if="product.hoverImage"
-            :src="product.hoverImage"
-            :alt="product.name + ' hover'"
-        />
+				<!-- Hiển thị các ảnh phụ (chỉ hiển thị tối đa 2 ảnh) -->
+				<img
+					v-for="(img, index) in limitedImages"
+					:key="'extra-img-' + img.id"
+					:src="img.imageUrl"
+					:alt="product.name + ' extra ' + index"
+				/>
+			</div>
 
-        <!-- Ảnh phụ -->
-        <img
-            v-for="(img, index) in limitedImages"
-            :key="'extra-img-' + img.id"
-            :src="img.imageUrl"
-            :alt="product.name + ' extra ' + index"
-        />
-      </div>
-
-
-      <div class="info">
+			<div class="info">
 				<p>{{ product.category || "Women's-Origin" }}</p>
 				<p><i class="fa-solid fa-star" v-for="n in 6" :key="n"></i></p>
 				<h1>{{ product.name }}</h1>
@@ -72,7 +63,7 @@
 					<div
 						v-for="(size, index) in product.sizes"
 						:key="'size-' + size.id"
-						:class="{
+						:class="{ 
 							selected: selectedSizeIndex === index,
 							disabled: addingToCart
 						}"
@@ -95,28 +86,27 @@
 					{{ cartStore.error }}
 				</div>
 
-				<div class="add"
-					@click="addToBag"
-					:class="{
-						disabled: !canAddToCart || addingToCart || cartStore.loading
+				<div class="add" 
+					@click="addToBag" 
+					:class="{ 
+						disabled: !canAddToCart || addingToCart || cartStore.loading 
 					}"
 					:style="{ opacity: (addingToCart || cartStore.loading) ? 0.7 : 1 }">
 					<h1>{{ addingToCart ? 'ĐANG THÊM...' : 'ADD TO BAG' }}</h1>
 					<i class="fa-solid fa-arrow-right"></i>
 				</div>
+				
+				<div class="favourite" 
+					@click="addToFavorites" 
+					:class="{ 
+						active: isFavorite,
+						disabled: addingToCart 
+					}">
+					<i class="fa-solid fa-heart"></i>
+					<span>{{ isFavorite ? 'ĐÃ YÊU THÍCH' : 'THÊM VÀO YÊU THÍCH' }}</span>
+				</div>
 
-        <div class="favourite"
-             @click="addToFavorites"
-             :class="{
-       active: isFavorite,
-       disabled: addingToCart
-     }">
-          <i class="fa-solid fa-heart"></i>
-          <span>{{ isFavorite ? 'ĐÃ YÊU THÍCH' : 'THÊM VÀO YÊU THÍCH' }}</span>
-        </div>
-
-
-        <div class="product-features">
+				<div class="product-features">
 					<p v-if="product.paymentOptions" class="feature-item">
 						<i class="fa-solid fa-credit-card"></i> {{ product.paymentOptions }}
 					</p>
@@ -127,7 +117,7 @@
 						<i class="fa-solid fa-money-check-dollar"></i> {{ product.returnsExchanges }}
 					</p>
 				</div>
-
+				
 				<!-- Hiển thị mô tả sản phẩm -->
 				<div class="description" v-if="product.description">
 					<h3>Product Description</h3>
@@ -156,13 +146,13 @@ import { useRoute } from 'vue-router';
 import Header from './AppHeader.vue';
 import Foot from './Foot.vue';
 import { useProductStore } from '@/stores/productStore';
-import { useCartStore } from '@/stores/cartStore';
-import { useFavoritesStore } from '@/stores/favoritesStore';
+import { useCartStore } from '@/stores/cartStore'; 
+import { useFavoritesStore } from '@/stores/favoritesStore'; 
 
 const route = useRoute();
 const productStore = useProductStore();
-const cartStore = useCartStore();
-const favoritesStore = useFavoritesStore();
+const cartStore = useCartStore(); 
+const favoritesStore = useFavoritesStore(); 
 
 const selectedColorIndex = ref(0);
 const selectedSizeIndex = ref(0);
@@ -240,7 +230,7 @@ const canAddToCart = computed(() => {
 	if (hasSizes && selectedSizeIndex.value === null) {
 		return false;
 	}
-
+	
 	return true;
 });
 
@@ -258,10 +248,10 @@ const addToBag = async () => {
 		}
 		return;
 	}
-
+	
 	addingToCart.value = true;
 	cartStore.clearError(); // Clear any previous errors
-
+	
 	try {
 		// Chuẩn bị dữ liệu sản phẩm để thêm vào giỏ hàng
 		const productData = {
@@ -276,7 +266,7 @@ const addToBag = async () => {
 
 		// Gọi action addToCart từ store
 		const success = await cartStore.addToCart(productData, colorName, sizeValue);
-
+		
 		if (success) {
 			alert(`Đã thêm ${product.value.name} (${colorName}, Size ${sizeValue}) vào giỏ hàng!`);
 		} else {
@@ -291,42 +281,27 @@ const addToBag = async () => {
 };
 
 const addToFavorites = async () => {
-  if (!product.value || addingToCart.value) return;
-
-  try {
-    const wasFavorite = favoritesStore.isFavorite(product.value.id);
-
-    await favoritesStore.toggleFavorite(product.value);
-
-    if (wasFavorite) {
-      alert('Đã xoá sản phẩm khỏi danh sách yêu thích.');
-    } else {
-      alert('Đã thêm sản phẩm vào danh sách yêu thích.');
-    }
-  } catch (error) {
-    console.error('Lỗi khi thêm vào yêu thích:', error);
-    alert('Có lỗi xảy ra khi xử lý yêu thích!');
-  }
+	if (!product.value || addingToCart.value) return;
+	try {
+		await favoritesStore.toggleFavorite(product.value);
+	} catch (error) {
+		console.error('Lỗi khi thêm vào yêu thích:', error);
+		alert('Có lỗi xảy ra khi thêm vào yêu thích!');
+	}
 };
 
-
-
 onMounted(async () => {
-  const productId = route.params.id;
-  try {
-    loading.value = true;
-    await Promise.all([
-      productStore.fetchProductWithVideos(productId),
-      favoritesStore.fetchFavorites()
-    ]);
-  } catch (error) {
-    console.error('Lỗi khi tải sản phẩm:', error);
-  } finally {
-    loading.value = false;
-  }
+	const productId = route.params.id;
+	try {
+		loading.value = true;
+		// Sử dụng endpoint mới để lấy sản phẩm với videos
+		await productStore.fetchProductWithVideos(productId);
+	} catch (error) {
+		console.error('Lỗi khi tải sản phẩm:', error);
+	} finally {
+		loading.value = false;
+	}
 });
-
-
 </script>
 
 <style scoped>
@@ -337,8 +312,8 @@ onMounted(async () => {
 .nav-bar{
     display: flex;
     justify-content: space-between;
-
-
+    
+    
 }
 .nav-bar ul {
     list-style: none;
@@ -375,7 +350,7 @@ onMounted(async () => {
 }
 /* section */
 .back a{
-
+    
     color: black;
     font-weight: bold;
 
@@ -391,8 +366,8 @@ onMounted(async () => {
     width: 30%;
     gap: 2px;
     margin: 10px;
-
-
+    
+    
 }
 
 .product img{
@@ -400,22 +375,22 @@ onMounted(async () => {
     margin: 0; /* Loại bỏ margin */
     padding: 0; /* Loại bỏ padding */
     border-radius: 5px;
-
+    
 }
 .product video{
     width: 31em;
 }
 .size {
     display: grid;
-    grid-template-columns: repeat(5, 50px);
-    gap: 2px;
+    grid-template-columns: repeat(5, 50px); 
+    gap: 2px; 
     padding: 10px;
   }
-
+  
   .size div {
     border: 1px solid #ccc;
     display: grid;
-    place-items: center;
+    place-items: center; 
     background: linear-gradient(to right, #eaeeef 0%, #eaeeef 100%);
   }
   .size div:hover{
@@ -445,31 +420,15 @@ onMounted(async () => {
     align-items: center;
     height: 50px;
   }
-.favourite {
-  color: red;
-  padding: 20px;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  user-select: none;
-}
-
-.favourite i {
-  font-size: 40px;
-}
-
-.favourite.disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.favourite.active i {
-  color: #ff4d4f;
-}
-
-
-/*  footer*/
+  .favourite{
+    color: red;
+    padding: 20px;
+  }
+  .favourite i{
+   font-size: 40px;
+  }
+ 
+  /*  footer*/
   .join{
     text-transform: uppercase;
     font-weight: bold;
@@ -502,7 +461,7 @@ onMounted(async () => {
   line-height: 2;
 }
 @media (max-width:768px) {
-
+  
   .product img{
     width: 400px;
     display: block;
@@ -518,22 +477,22 @@ onMounted(async () => {
   .info{
     width: 100%;
     margin: 10px;
-
+   
   }
   .size{
-
+    
       display: grid;
-      grid-template-columns: repeat(auto-fit, calc(100% / 5));
+      grid-template-columns: repeat(auto-fit, calc(100% / 5)); 
       gap: 2px;
       padding: 10px;
-      width: 100%;
+      width: 100%; 
   }
   .size div {
     border: 1px solid #ccc;
     display: grid;
     place-items: center;
     background: linear-gradient(to right, #eaeeef 0%, #eaeeef 100%);
-    height: 30px;
+    height: 30px; 
   }
   .info h1{
     display: flex;
@@ -580,12 +539,12 @@ onMounted(async () => {
 
   .hamburger-menu {
       margin-top: 20px;
-
-
+     
+   
       display: inline-block; /* Hiển thị hamburger trên màn hình nhỏ */
   }
-
-
+  
+  
 }
 @media(max-width:480px){
   .product img{

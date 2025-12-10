@@ -2,6 +2,7 @@
   <div class="qr-payment" v-if="show">
     <div class="qr-overlay" @click="closeQR">
       <div class="qr-modal" @click.stop>
+        
         <div class="qr-header">
           <h3>Thanh toán QR Code</h3>
           <button @click="closeQR" class="close-btn">&times;</button>
@@ -22,7 +23,7 @@
               
               <div class="countdown-timer">
                  <span :class="{ 'text-red': timeLeft < 60 }">
-                    Thời gian còn lại: {{ formattedTime }}
+                   Thời gian còn lại: {{ formattedTime }}
                  </span>
               </div>
 
@@ -30,7 +31,7 @@
               
               <div class="bank-info">
                 <p><strong>Ngân hàng:</strong> BIDV</p>
-                <p><strong>Số tài khoản:</strong> 8857120992</p>
+                <p><strong>Số tài khoản:</strong> 962470867447890</p>
                 <p><strong>Chủ tài khoản:</strong> DANG TRUNG HAI</p>
                 <p><strong>Nội dung CK:</strong> <span style="color:red; font-weight:bold">{{ qrContent }}</span></p>
               </div>
@@ -51,7 +52,8 @@
                <div class="success-icon">🎉</div>
                <h3>Thanh toán thành công!</h3>
                <p>Hệ thống đã nhận được tiền.</p>
-               <p>Đang chuyển hướng...</p>
+               <p style="color: #28a745; font-weight: bold;">Đang xuất hóa đơn điện tử...</p>
+               <div class="spinner-small" style="margin: 10px auto;"></div>
             </div>
             
              <div v-else class="qr-placeholder">
@@ -66,30 +68,36 @@
 </template>
 
 <script setup>
-import { ref, onUnmounted, onMounted, computed, watch } from 'vue'
-import axios from 'axios' // 🔥 Bắt buộc import axios
+/* eslint-disable no-undef */
+// Dòng trên dùng để tắt lỗi báo defineProps/defineEmits
 
-// eslint-disable-next-line no-undef, no-unused-vars
+import { ref, onUnmounted, onMounted, computed, watch } from 'vue'
+import axios from 'axios'
+import jsPDF from 'jspdf'
+import autoTable from 'jspdf-autotable'
+
+// --- CẤU HÌNH ---
+const API_BASE_URL = 'http://localhost:8082' 
+
 const props = defineProps({
   show: { type: Boolean, default: false },
   amount: { type: Number, required: true },
   orderId: { type: String, required: true }
 })
 
-// eslint-disable-next-line no-undef
 const emit = defineEmits(['close', 'payment-success'])
 
 // State variables
-const paymentStatus = ref('waiting') // waiting, success
+const paymentStatus = ref('waiting') 
 const currentUser = ref(null)
 const showQRCode = ref(false)
 const qrCodeDataUrl = ref('')
 const qrContent = ref('')
 
 // Variables cho Polling và Timer
-const timeLeft = ref(300) // 5 phút
+const timeLeft = ref(300) 
 let timerInterval = null
-let pollingInterval = null // Biến để lưu vòng lặp kiểm tra API
+let pollingInterval = null 
 
 // Formatter
 const formattedTime = computed(() => {
@@ -102,7 +110,7 @@ const formatPrice = (price) => {
   return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price)
 }
 
-// Check login
+// Logic Login
 onMounted(() => {
   const user = localStorage.getItem('userLogin') 
   if (user) {
@@ -110,7 +118,7 @@ onMounted(() => {
   }
 })
 
-// Dọn dẹp khi tắt component
+// Dọn dẹp
 onUnmounted(() => {
   stopAllIntervals()
 })
@@ -120,22 +128,17 @@ const stopAllIntervals = () => {
     if (pollingInterval) clearInterval(pollingInterval)
 }
 
-// --- 1. HÀM TẠO QR ---
-// Trong file QRPayment.vue
-
+// --- 1. LOGIC QR CODE ---
 const generateQRCode = () => {
-    // Reset
     paymentStatus.value = 'waiting'
     timeLeft.value = 300
     
     const description = `DH ${props.orderId}`
     qrContent.value = description 
 
-    // 🔥 SỬA LẠI THÔNG TIN NGÂN HÀNG CHO KHỚP VỚI SEPAY (BIDV)
-    const bankCode = '970418' // Mã BIDV (theo VietQR)
-    const accountNumber = '962470867447890' // Số tài khoản BIDV của bạn (như trong ảnh)
+    const bankCode = '970418' // BIDV
+    const accountNumber = '962470867447890' 
     
-    // Link tạo QR
     const qrUrl = `https://img.vietqr.io/image/${bankCode}-${accountNumber}-compact2.png` +
                   `?amount=${props.amount}&addInfo=${encodeURIComponent(description)}`
 
@@ -146,7 +149,6 @@ const generateQRCode = () => {
     startPolling()
 }
 
-// --- 2. HÀM ĐẾM NGƯỢC ---
 const startTimer = () => {
     if (timerInterval) clearInterval(timerInterval)
     timerInterval = setInterval(() => {
@@ -160,47 +162,143 @@ const startTimer = () => {
     }, 1000)
 }
 
-// --- 3. HÀM CHECK TRẠNG THÁI TỰ ĐỘNG (QUAN TRỌNG NHẤT) ---
+// --- 2. POLLING API CHECK TRẠNG THÁI ---
 const startPolling = () => {
     if (pollingInterval) clearInterval(pollingInterval)
     
-    // Cứ 2 giây gọi API 1 lần
     pollingInterval = setInterval(async () => {
         try {
-            console.log("Checking payment status for:", props.orderId)
+            // Gọi API kiểm tra trạng thái
+            const response = await axios.get(`${API_BASE_URL}/api/payment/check-status/${props.orderId}`)
+            const status = response.data 
             
-            // Gọi API Backend của bạn
-            const response = await axios.get(`http://localhost:8082/api/payment/check-status/${props.orderId}`)
-            
-            const status = response.data // Backend trả về "PENDING" hoặc "PAID"
-            
-            if (status === 'PAID') {
-                // Đã thanh toán thành công!
+            // Nếu Backend trả về "PAID" hoặc object { status: "PAID" }
+            if (status === 'PAID' || status?.status === 'PAID') {
                 handleSuccess()
             }
         } catch (error) {
-            // Lỗi mạng hoặc 404 (chưa có đơn) thì cứ lờ đi và check tiếp
-            console.warn("Chưa thấy thanh toán hoặc lỗi mạng:", error.message)
+           // Không làm gì để tránh lỗi empty block
+           console.log("Checking payment...", error.message)
         }
-    }, 2000) // 2000ms = 2 giây
-}
-
-const handleSuccess = () => {
-    stopAllIntervals() // Dừng hỏi API
-    paymentStatus.value = 'success' // Chuyển giao diện sang thành công
-    
-    // Đợi 2 giây cho người dùng xem thông báo rồi tắt
-    setTimeout(() => {
-        emit('payment-success')
     }, 2000)
 }
 
-const closeQR = () => {
-  stopAllIntervals()
-  emit('close')
+// --- 3. XỬ LÝ THÀNH CÔNG & XUẤT HÓA ĐƠN ---
+const handleSuccess = async () => {
+    stopAllIntervals()
+    paymentStatus.value = 'success'
+    
+    // Gọi hàm tạo hóa đơn ngay khi thành công
+    try {
+        await fetchAndExportInvoice()
+    } catch (error) {
+        console.error("Lỗi xuất hóa đơn:", error)
+        alert("Thanh toán thành công nhưng không thể tải hóa đơn.")
+    }
+
+    // Đợi 3 giây để người dùng thấy thông báo rồi đóng
+    setTimeout(() => {
+        emit('payment-success')
+    }, 3000)
 }
 
-// Watch: Khi popup mở lên thì tự chạy logic
+// --- 4. LOGIC GỌI API & TẠO PDF ---
+const fetchAndExportInvoice = async () => {
+    try {
+        // Gọi API lấy chi tiết đơn hàng
+        const response = await axios.get(`${API_BASE_URL}/api/orders/${props.orderId}`)
+        const orderData = response.data
+        
+        generatePDF(orderData)
+    } catch (error) {
+        console.error("Không lấy được dữ liệu đơn hàng:", error)
+        throw error
+    }
+}
+
+const generatePDF = (data) => {
+    const doc = new jsPDF()
+
+    // --- Header ---
+    doc.setFontSize(22)
+    doc.text("HOA DON BAN HANG", 105, 20, { align: "center" })
+    
+    // --- Thông tin chung ---
+    doc.setFontSize(12)
+    doc.text(`Ma don hang: #${props.orderId}`, 15, 40)
+    
+    const today = new Date()
+    doc.text(`Ngay: ${today.getDate()}/${today.getMonth() + 1}/${today.getFullYear()}`, 15, 50)
+    
+    // Xử lý thông tin khách hàng
+    if (data.fullname || currentUser.value?.name) {
+        const name = data.fullname || currentUser.value?.name
+        doc.text(`Khach hang: ${removeVietnameseTones(name)}`, 15, 60)
+    }
+    // Fix lỗi thiếu thông tin
+    const phone = data.phone || data.phoneNumber || (currentUser.value ? currentUser.value.phone : '');
+    if (phone) {
+        doc.text(`SDT: ${phone}`, 15, 70)
+    }
+    if (data.address) {
+        doc.text(`Dia chi: ${removeVietnameseTones(data.address)}`, 15, 80)
+    }
+
+    // --- Bảng sản phẩm ---
+    // Tự động tìm mảng item dù tên là gì
+    const items = data.orderDetails || data.orderItems || data.items || [];
+    
+    const tableBody = items.map(item => [
+        removeVietnameseTones(item.productName || (item.product ? item.product.title : "") || "San pham"), 
+        item.quantity || item.num || 1,                              
+        formatMoney(item.price || 0),    
+        formatMoney(item.total_money || (item.price * (item.quantity || 1))) 
+    ]) 
+
+    autoTable(doc, {
+        startY: 90,
+        head: [['San pham', 'SL', 'Don gia', 'Thanh tien']],
+        body: tableBody,
+        theme: 'grid',
+    })
+
+    // --- Tổng tiền ---
+    const finalY = doc.lastAutoTable.finalY || 90
+    doc.setFontSize(14)
+    doc.text(`Tong tien: ${formatMoney(props.amount)} VND`, 140, finalY + 20)
+
+    // --- Footer ---
+    doc.setFontSize(10)
+    doc.text("Cam on quy khach!", 105, finalY + 40, { align: "center" })
+
+    // Tải file về
+    doc.save(`Hoa_don_${props.orderId}.pdf`)
+}
+
+const formatMoney = (amount) => {
+    return amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+}
+
+const removeVietnameseTones = (str) => {
+    if (!str) return ''
+    str = str.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g,"a"); 
+    str = str.replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g,"e"); 
+    str = str.replace(/ì|í|ị|ỉ|ĩ/g,"i"); 
+    str = str.replace(/ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ/g,"o"); 
+    str = str.replace(/ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ/g,"u"); 
+    str = str.replace(/ỳ|ý|ỵ|ỷ|ỹ/g,"y"); 
+    str = str.replace(/đ/g,"d");
+    str = str.replace(/À|Á|Ạ|Ả|Ã|Â|Ầ|Ấ|Ậ|Ẩ|Ẫ|Ă|Ằ|Ắ|Ặ|Ẳ|Ẵ/g, "A");
+    str = str.replace(/È|É|Ẹ|Ẻ|Ẽ|Ê|Ề|Ế|Ệ|Ể|Ễ/g, "E");
+    str = str.replace(/Ì|Í|Ị|Ỉ|Ĩ/g, "I");
+    str = str.replace(/Ò|Ó|Ọ|Ỏ|Õ|Ô|Ồ|Ố|Ộ|Ổ|Ỗ|Ơ|Ờ|Ớ|Ợ|Ở|Ỡ/g, "O");
+    str = str.replace(/Ù|Ú|Ụ|Ủ|Ũ|Ư|Ừ|Ứ|Ự|Ử|Ữ/g, "U");
+    str = str.replace(/Ỳ|Ý|Ỵ|Ỷ|Ỹ/g, "Y");
+    str = str.replace(/Đ/g, "D");
+    return str;
+}
+
+// Watch
 watch(() => props.show, (newVal) => {
   if (newVal) {
      generateQRCode()
@@ -212,7 +310,7 @@ watch(() => props.show, (newVal) => {
 </script>
 
 <style scoped>
-/* CSS cho phần Auto Check */
+/* CSS giữ nguyên từ code của bạn */
 .auto-check-status {
     margin-top: 15px;
     margin-bottom: 15px;
@@ -225,7 +323,6 @@ watch(() => props.show, (newVal) => {
     gap: 15px;
     text-align: left;
 }
-
 .spinner-small {
     width: 25px;
     height: 25px;
@@ -235,33 +332,13 @@ watch(() => props.show, (newVal) => {
     animation: spin 1s linear infinite;
     flex-shrink: 0;
 }
-
-.status-text p {
-    margin: 0;
-    color: #007bff;
-}
-
-.status-text .sub-text {
-    font-size: 12px;
-    color: #666;
-    margin-top: 2px;
-}
-
-/* Các CSS cũ */
+.status-text p { margin: 0; color: #007bff; }
+.status-text .sub-text { font-size: 12px; color: #666; margin-top: 2px; }
 .countdown-timer {
-  font-size: 16px;
-  font-weight: bold;
-  color: #dc3545;
-  margin-bottom: 10px;
-  background: #fff5f5;
-  padding: 5px 10px;
-  border-radius: 15px;
-  display: inline-block;
+  font-size: 16px; font-weight: bold; color: #dc3545; margin-bottom: 10px;
+  background: #fff5f5; padding: 5px 10px; border-radius: 15px; display: inline-block;
 }
-
-.qr-payment {
-  position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 9999;
-}
+.qr-payment { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 9999; }
 .qr-overlay {
   position: absolute; top: 0; left: 0; right: 0; bottom: 0;
   background: rgba(0, 0, 0, 0.7); display: flex; align-items: center; justify-content: center; padding: 20px;
@@ -271,7 +348,6 @@ watch(() => props.show, (newVal) => {
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3); overflow-y: auto; display: flex; flex-direction: column;
 }
 @media (min-width: 576px) { .qr-modal { max-width: 400px; } }
-
 .qr-header {
   padding: 20px; background: #007bff; color: white; display: flex; justify-content: space-between; align-items: center;
 }
@@ -287,4 +363,3 @@ watch(() => props.show, (newVal) => {
 .spinner { width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #007bff; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto; }
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 </style>
-Đang hiển thị 5586663866879172676.

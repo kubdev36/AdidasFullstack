@@ -11,7 +11,11 @@
       <div class="order-summary">
         <h3>Đơn hàng của bạn</h3>
         <div class="order-items">
-          <div v-for="item in cartStore.items" :key="item.id + '-' + item.sizeValue + '-' + item.colorName" class="order-item">
+          <div
+            v-for="item in cartStore.items"
+            :key="item.id + '-' + item.sizeValue + '-' + item.colorName"
+            class="order-item"
+          >
             <div class="item-info">
               <span class="item-name">{{ item.productName }}</span>
               <div class="item-details">
@@ -23,33 +27,33 @@
             <span class="item-price">{{ formatPrice(item.price * item.quantity) }}</span>
           </div>
         </div>
+
         <div class="order-total">
           <div class="order-line">
             <span>Tạm tính:</span>
-            <span>{{ formatPrice(cartStore.finalTotal) }}</span>
+            <span>{{ formatPrice(cartStore.totalPrice) }}</span>
           </div>
 
           <div
-              v-if="cartStore.discount > 0"
-              class="order-line order-discount"
+            v-if="cartStore.discount > 0"
+            class="order-line order-discount"
           >
-            <span>Giảm giá</span>
+            <span>Giảm giá:</span>
             <span>-{{ formatPrice(cartStore.discount) }}</span>
           </div>
 
           <div class="order-line order-final">
             <strong>Thành tiền:</strong>
-            <strong>{{ formatPrice(cartStore.totalPrice) }}</strong>
+            <strong>{{ formatPrice(cartStore.finalTotal) }}</strong>
           </div>
 
           <div
-              v-if="cartStore.voucherCode"
-              class="order-voucher"
+            v-if="cartStore.voucherCode"
+            class="order-voucher"
           >
             <small>Mã áp dụng: {{ cartStore.voucherCode }}</small>
           </div>
         </div>
-
       </div>
 
       <form @submit.prevent="processOrder" class="checkout-form">
@@ -84,11 +88,11 @@
           <h3>Đánh giá sản phẩm</h3>
           <div class="stars">
             <span
-                v-for="n in 5"
-                :key="n"
-                class="star"
-                :class="{ active: n <= stars }"
-                @click="stars = n"
+              v-for="n in 5"
+              :key="n"
+              class="star"
+              :class="{ active: n <= stars }"
+              @click="stars = n"
             >★</span>
           </div>
           <textarea v-model="comment" placeholder="Nhập bình luận..." rows="3" />
@@ -120,15 +124,14 @@
     </div>
 
     <QRPayment
-        v-if="showQRPayment"
-        :show="showQRPayment"
-        :amount="cartStore.finalTotal"
-        :order-id="currentOrderId"
-        @close="handleQRClose"
-        @payment-success="handlePaymentSuccess"
-        @payment-failed="handlePaymentFailed"
+      v-if="showQRPayment"
+      :show="showQRPayment"
+      :amount="cartStore.finalTotal"
+      :order-id="currentOrderId"
+      @close="handleQRClose"
+      @payment-success="handlePaymentSuccess"
+      @payment-failed="handlePaymentFailed"
     />
-
   </div>
 </template>
 
@@ -136,20 +139,25 @@
 import { ref, onMounted, computed } from 'vue';
 import { useCartStore } from '@/stores/cartStore';
 import { useRouter } from 'vue-router';
+import axios from 'axios';
 import QRPayment from './QRPayment.vue';
+import { exportInvoicePDF } from '../utils/invoiceExport.js';
 
 const cartStore = useCartStore();
 const router = useRouter();
 
 const processing = ref(false);
 const showQRPayment = ref(false);
-const currentOrderId = ref(null);
+const currentOrderId = ref('');
 const stars = ref(0);
 const comment = ref('');
 
 const currentUser = computed(() => {
   try {
-    const userStr = localStorage.getItem('user') || localStorage.getItem('userLogin') || localStorage.getItem('currentUser');
+    const userStr =
+      localStorage.getItem('userLogin') ||
+      localStorage.getItem('user') ||
+      localStorage.getItem('currentUser');
     return userStr ? JSON.parse(userStr) : null;
   } catch (error) {
     console.error('Error parsing user:', error);
@@ -168,143 +176,172 @@ const orderForm = ref({
 
 const formatPrice = (price) => {
   if (typeof price !== 'number') return '0 đ';
-  return price.toLocaleString('vi-VN') + ' đ';
+  return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
 };
 
 const checkLoginStatus = () => {
-  console.log('🔍 Checking login status...');
-  console.log('👤 Current user:', currentUser.value);
-
   if (currentUser.value) {
-    // Tự động điền thông tin người dùng vào form
     orderForm.value.fullName = currentUser.value.name || '';
     orderForm.value.email = currentUser.value.email || '';
+    orderForm.value.phone = currentUser.value.phone || '';
+    orderForm.value.address = currentUser.value.address || '';
   }
 };
 
+const getCommonOrderData = () => {
+  return {
+    fullName: orderForm.value.fullName,
+    customerName: orderForm.value.fullName,
+    email: orderForm.value.email,
+    phoneNumber: orderForm.value.phone,
+    address: orderForm.value.address,
+    notes: orderForm.value.notes,
+
+    userId: currentUser.value ? (currentUser.value.id || currentUser.value.userId) : null,
+    status: 'PENDING',
+
+    // Giá tiền
+    subtotal: cartStore.totalPrice,
+    discount: cartStore.discount,
+    voucherCode: cartStore.voucherCode || null,
+    total: cartStore.finalTotal,
+
+    // Sản phẩm
+    orderItems: cartStore.items.map(item => ({
+      productId: String(item.productId || item.id),
+      productName: item.productName,
+      quantity: item.quantity,
+      price: item.price,
+      colorName: item.colorName || '',
+      sizeValue: item.sizeValue || '',
+      image: item.image || null
+    })),
+
+    rating: stars.value,
+    comment: comment.value
+  };
+};
+
 const processOrder = async () => {
-  // Kiểm tra đăng nhập
   if (!currentUser.value) {
     alert('Vui lòng đăng nhập để thanh toán!');
-    router.push('/auth');
+    router.push('/login');
+    return;
+  }
+
+  if (cartStore.items.length === 0) {
+    alert('Giỏ hàng đang trống!');
     return;
   }
 
   processing.value = true;
 
   try {
-    console.log('🛒 Processing order...');
-    console.log('📦 Cart items:', cartStore.items);
-    console.log('💰 Total price:', cartStore.totalPrice);
+    const orderData = getCommonOrderData();
+    orderData.paymentMethod =
+      orderForm.value.paymentMethod === 'qr'
+        ? 'QR_CODE'
+        : orderForm.value.paymentMethod === 'card'
+        ? 'CARD'
+        : 'COD';
 
-    // Tạo đối tượng đơn hàng
-    const orderData = {
-      ...orderForm.value,
-      items: cartStore.items.map(item => ({
-        productId: item.productId,
-        productName: item.productName,
-        price: item.price,
-        quantity: item.quantity,
-        colorName: item.colorName,
-        sizeValue: item.sizeValue,
-        image: item.image
-      })),
-      subtotal: cartStore.totalPrice,
-      discount: cartStore.discount,
-      voucherCode: cartStore.voucherCode || null,
-      total: cartStore.finalTotal,
-      date: new Date().toISOString(),
-      status: 'pending',
-      userId: currentUser.value.id,
-      userEmail: currentUser.value.email,
-      rating: stars.value,
-      comment: comment.value
+    const token = localStorage.getItem('authToken');
+    const config = {
+      headers: {
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        'Content-Type': 'application/json'
+      }
     };
 
-    console.log('📋 Order data:', orderData);
+    console.log('📤 Đang gửi đơn hàng:', orderData);
 
-    // Xử lý thanh toán QR nếu được chọn
-    if (orderForm.value.paymentMethod === 'qr') {
-      currentOrderId.value = 'ORD-' + Date.now();
-      showQRPayment.value = true;
-    } else {
-      // Logic cho COD và các phương thức khác
-      await handleOrderSuccess(orderData);
+    const response = await axios.post('http://localhost:8082/api/orders', orderData, config);
+
+    if (response.status === 200 || response.status === 201) {
+      const savedOrder = response.data;
+      console.log('✅ Tạo đơn thành công:', savedOrder);
+
+      if (orderForm.value.paymentMethod === 'qr') {
+        currentOrderId.value = String(savedOrder.id);
+        showQRPayment.value = true;
+      } else {
+        const invoiceData = {
+          id: savedOrder.id,
+          orderDate: new Date(),
+
+          // 1. Lấy thông tin khách từ Form
+          customerName: orderForm.value.fullName,
+          phoneNumber: orderForm.value.phone,
+          address: orderForm.value.address,
+
+          // 2. Lấy sản phẩm + Màu/Size từ Giỏ hàng
+          orderItems: cartStore.items.map(item => ({
+            productName: item.productName,
+            quantity: item.quantity,
+            price: item.price,
+            colorName: item.colorName,
+            sizeValue: item.sizeValue,
+            total_money: item.price * item.quantity
+          })),
+
+          // 3. Thông tin tiền tệ (có giảm giá)
+          subtotal: cartStore.totalPrice,
+          discount: cartStore.discount,
+          voucherCode: cartStore.voucherCode || null,
+          total: cartStore.finalTotal
+        };
+
+        console.log('📄 Dữ liệu in PDF:', invoiceData);
+
+        try {
+          exportInvoicePDF(invoiceData);
+        } catch (pdfError) {
+          console.error('Lỗi in hóa đơn COD:', pdfError);
+        }
+
+        alert(
+          `🎉 Đặt hàng thành công!\nMã đơn: ${savedOrder.id}\n` +
+          `Thành tiền: ${formatPrice(cartStore.finalTotal)}\n` +
+          `Hóa đơn đang được tải xuống...`
+        );
+
+        await cartStore.clearCart();
+        router.push('/');
+      }
     }
+
   } catch (error) {
-    console.error('❌ Lỗi xử lý đơn hàng:', error);
-    alert('Đã xảy ra lỗi khi đặt hàng. Vui lòng thử lại.');
+    console.error('❌ Lỗi tạo đơn hàng:', error);
+    alert('Có lỗi xảy ra khi tạo đơn hàng. Vui lòng kiểm tra lại.');
   } finally {
-    processing.value = false;
+    if (orderForm.value.paymentMethod !== 'qr') {
+      processing.value = false;
+    }
   }
 };
 
-const handleOrderSuccess = async (orderData) => {
-  try {
-    // TODO: Gửi orderData đến backend API
-    // const response = await axios.post('http://localhost:8082/api/orders', orderData);
-
-    console.log('✅ Order created successfully:', orderData);
-
-    // Hiển thị thông báo thành công
-    alert(
-        `Đặt hàng thành công! Tổng tiền: ${formatPrice(cartStore.finalTotal)}\n` +
-        `Mã đơn hàng: ${currentOrderId.value || 'COD-' + Date.now()}`
-    );
-
-    // Xóa giỏ hàng
-    await cartStore.clearCart();
-
-    // Chuyển hướng về trang chủ
-    router.push('/');
-  } catch (error) {
-    console.error('❌ Error saving order:', error);
-    alert('Lỗi khi lưu đơn hàng. Vui lòng thử lại.');
-  }
-};
-
-const handleQRClose = () => {
+const handlePaymentSuccess = async () => {
   showQRPayment.value = false;
-  console.log('❌ QR payment closed');
-};
-
-const handlePaymentSuccess = (paymentData) => {
-  console.log('✅ QR Payment successful:', paymentData);
-  showQRPayment.value = false;
-
-  // Tạo order data cho QR payment
-  const orderData = {
-    ...orderForm.value,
-    items: cartStore.items,
-    subtotal: cartStore.totalPrice,
-    discount: cartStore.discount,
-    voucherCode: cartStore.voucherCode || null,
-    total: cartStore.finalTotal,       // ✅ sau giảm
-    date: new Date().toISOString(),
-    status: 'paid',
-    userId: currentUser.value.id,
-    paymentMethod: 'qr',
-    paymentId: paymentData.paymentId,
-    orderId: currentOrderId.value
-  };
-
-
-  handleOrderSuccess(orderData);
+  processing.value = false;
+  await cartStore.clearCart();
+  router.push('/');
 };
 
 const handlePaymentFailed = (error) => {
   console.error('❌ QR Payment failed:', error);
   alert('Thanh toán QR thất bại. Vui lòng thử lại hoặc chọn phương thức khác.');
   showQRPayment.value = false;
+  processing.value = false;
+};
+
+const handleQRClose = () => {
+  showQRPayment.value = false;
+  processing.value = false;
 };
 
 onMounted(() => {
-  console.log('🛒 Checkout page mounted');
   checkLoginStatus();
-
-  // Kiểm tra nếu giỏ hàng trống
   if (cartStore.items.length === 0) {
-    console.log('🛒 Cart is empty, fetching cart...');
     cartStore.fetchCart();
   }
 });
@@ -332,6 +369,20 @@ onMounted(() => {
   display: grid;
   grid-template-columns: 1fr 2fr;
   gap: 40px;
+}
+
+@media (max-width: 768px) {
+  .checkout-container {
+    grid-template-columns: 1fr;
+  }
+  .form-actions {
+    flex-direction: column;
+  }
+  .btn-primary,
+  .btn-order,
+  .btn-back {
+    width: 100%;
+  }
 }
 
 .order-summary {
@@ -389,8 +440,29 @@ onMounted(() => {
 .order-total {
   padding-top: 15px;
   border-top: 2px solid #333;
-  font-size: 1.2rem;
+  font-size: 1rem;
   color: #333;
+}
+
+.order-line {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.order-discount span:last-child {
+  color: #b30404;
+}
+
+.order-final strong:last-child {
+  color: #b30404;
+  font-size: 1.1rem;
+}
+
+.order-voucher {
+  margin-top: 4px;
+  color: #555;
+  font-size: 0.85rem;
 }
 
 .checkout-form {
@@ -539,49 +611,4 @@ onMounted(() => {
   padding: 10px;
   font-size: 14px;
 }
-
-@media (max-width: 768px) {
-  .checkout-container {
-    grid-template-columns: 1fr;
-  }
-
-  .form-actions {
-    flex-direction: column;
-  }
-
-  .btn-primary,
-  .btn-order,
-  .btn-back {
-    width: 100%;
-  }
-}
-
-.order-total {
-  padding-top: 15px;
-  border-top: 2px solid #333;
-  font-size: 1rem;
-  color: #333;
-}
-
-.order-line {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 4px;
-}
-
-.order-discount span:last-child {
-  color: #b30404;
-}
-
-.order-final strong:last-child {
-  color: #b30404;
-  font-size: 1.1rem;
-}
-
-.order-voucher {
-  margin-top: 4px;
-  color: #555;
-  font-size: 0.85rem;
-}
-
 </style>

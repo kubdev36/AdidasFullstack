@@ -20,7 +20,6 @@ export const useFavoritesStore = defineStore('favorites', {
                 console.log('[Favorites] GET', `${API_BASE}/${USER_ID}`)
                 const res = await axios.get(`${API_BASE}/${USER_ID}`)
 
-                // 🔥 GIỮ NGUYÊN TÊN FIELD Y NHƯ FavoriteDTO (BACKEND)
                 // FavoriteDTO: id, productId, name, image, price, (colors?, sizes?)
                 this.favoriteItems = Array.isArray(res.data) ? res.data : []
 

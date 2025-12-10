@@ -2,9 +2,6 @@ package adiadas_backedn.backend.dto;
 
 import adiadas_backedn.backend.model.Favorite;
 import adiadas_backedn.backend.model.Product;
-import adiadas_backedn.backend.model.ProductColor;
-import adiadas_backedn.backend.model.ProductSize;
-import adiadas_backedn.backend.model.ProductImage;
 
 import java.util.List;
 import java.util.stream.Collectors;

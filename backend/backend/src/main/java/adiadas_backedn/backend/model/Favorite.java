@@ -1,6 +1,7 @@
 package adiadas_backedn.backend.model;
 
 import jakarta.persistence.*;
+
 import java.time.LocalDateTime;
 
 @Entity

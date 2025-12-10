@@ -2,8 +2,11 @@
   <div v-if="show" class="cart-modal-overlay" @click.self="close">
     <div class="cart-modal">
       <h2>Giỏ hàng</h2>
+      
       <div v-if="cartStore.loading" class="loading">Đang tải giỏ hàng...</div>
+      
       <div v-else-if="cartStore.items.length === 0">Giỏ hàng trống</div>
+      
       <div v-else>
         <div v-for="item in cartStore.items" :key="item.id" class="cart-item">
           <img :src="item.image" :alt="item.productName" class="cart-item-img" />
@@ -14,51 +17,65 @@
               <span v-if="item.sizeValue">Size: {{ item.sizeValue }}</span>
             </div>
             <div class="cart-item-price">{{ formatPrice(item.price) }}</div>
+            
             <div class="cart-item-qty">
               <button @click="decreaseQty(item)" :disabled="cartStore.loading">-</button>
               <span>{{ item.quantity }}</span>
               <button @click="increaseQty(item)" :disabled="cartStore.loading">+</button>
             </div>
           </div>
-          <button
-              class="cart-item-remove"
-              @click="removeItem(item)"
-              :disabled="cartStore.loading"
+          
+          <button 
+            class="cart-item-remove" 
+            @click="removeItem(item)"
+            :disabled="cartStore.loading"
           >
             {{ cartStore.loading ? '...' : 'Xóa' }}
           </button>
         </div>
+
+        <!-- ✅ GIỮ NGUYÊN DÒNG TỔNG TIỀN CŨ CỦA CODE 1 -->
         <div class="cart-total">
+          <span>Tổng tiền:</span>
+          <span class="cart-total-value">{{ formatPrice(cartStore.totalPrice) }}</span>
+        </div>
+
+        <!-- ✅ THÊM PHẦN MỚI CỦA CODE 2 MÀ KHÔNG ĐỤNG CODE CŨ -->
+
+        <!-- Tạm tính (nếu bạn đang dùng finalTotal trong store) -->
+        <div class="cart-total" v-if="cartStore.finalTotal !== undefined">
           <span>Tạm tính:</span>
           <span class="cart-total-value">{{ formatPrice(cartStore.finalTotal) }}</span>
         </div>
 
-        <!-- 👇 thêm hiển thị giảm giá nếu có -->
-        <div v-if="cartStore.discount > 0" class="cart-discount">
+        <!-- Giảm giá nếu có -->
+        <div v-if="cartStore.discount && cartStore.discount > 0" class="cart-discount">
           <span>Giảm giá:</span>
           <span class="cart-discount-value">-{{ formatPrice(cartStore.discount) }}</span>
         </div>
 
+        <!-- Thành tiền (có thể trùng với totalPrice hiện tại) -->
         <div class="cart-final">
           <span>Thành tiền:</span>
           <span class="cart-final-value">{{ formatPrice(cartStore.totalPrice) }}</span>
         </div>
+
         <!-- Mã giảm giá -->
         <div class="voucher-section">
           <label for="voucher">Mã giảm giá</label>
           <div class="voucher-input-group">
             <input
-                id="voucher"
-                type="text"
-                v-model="cartStore.voucherCode"
-                placeholder="Nhập mã (VD: DEAL30)"
-                :disabled="cartStore.loading"
+              id="voucher"
+              type="text"
+              v-model="cartStore.voucherCode"
+              placeholder="Nhập mã (VD: DEAL30)"
+              :disabled="cartStore.loading"
             />
             <button
-                type="button"
-                class="apply-voucher-btn"
-                @click="applyVoucher"
-                :disabled="cartStore.loading || !cartStore.voucherCode"
+              type="button"
+              class="apply-voucher-btn"
+              @click="applyVoucher"
+              :disabled="cartStore.loading || !cartStore.voucherCode"
             >
               Áp dụng
             </button>
@@ -69,19 +86,20 @@
         </div>
 
       </div>
+
       <div class="cart-actions">
-        <button
-            v-if="cartStore.items.length > 0"
-            class="checkout-btn"
-            @click="checkout"
-            :disabled="cartStore.loading"
+        <!-- ✅ Giữ đúng điều kiện disable cũ: chỉ disable khi giỏ trống -->
+        <button 
+          class="checkout-btn" 
+          @click="checkout"
+          :disabled="cartStore.items.length === 0"
         >
           Thanh toán
         </button>
+        
         <button class="cart-modal-close" @click="close">Đóng</button>
       </div>
 
-      <!-- Hiển thị lỗi nếu có -->
       <div v-if="cartStore.error" class="error-message">
         {{ cartStore.error }}
       </div>
@@ -106,11 +124,11 @@ export default {
   },
   data() {
     return {
-      // Biến cục bộ cho các trạng thái loading riêng lẻ (nếu cần)
       processingItemId: null
     };
   },
-  emits: ['close'],
+  // ✅ thêm emits mới nhưng vẫn giữ 'close'
+  emits: ['close', 'error', 'checkout-success'],
   watch: {
     show: {
       immediate: true,
@@ -121,7 +139,6 @@ export default {
       }
     }
   },
-
   methods: {
     formatPrice(price) {
       return new Intl.NumberFormat('vi-VN', {
@@ -131,17 +148,17 @@ export default {
     },
 
     async fetchCart() {
-      // Kiểm tra đăng nhập trước
+      // Giữ behavior cũ: nếu chưa đăng nhập thì return
       if (!this.cartStore.isLoggedIn) {
         console.warn('User not logged in, cannot fetch cart');
+        // thêm emit lỗi nếu cha muốn hiển thị
         this.$emit('error', 'Vui lòng đăng nhập để xem giỏ hàng');
         return;
       }
-
       try {
         await this.cartStore.fetchCart();
       } catch (error) {
-        console.error('Lỗi khi tải giỏ hàng:', error);
+        console.error('Lỗi tải giỏ hàng:', error);
         this.$emit('error', 'Không thể tải giỏ hàng');
       }
     },
@@ -151,7 +168,7 @@ export default {
       try {
         await this.cartStore.increaseQty(item);
       } catch (error) {
-        console.error('Lỗi khi tăng số lượng:', error);
+        console.error('Lỗi tăng số lượng:', error);
         this.$emit('error', 'Không thể cập nhật số lượng');
       } finally {
         this.processingItemId = null;
@@ -163,7 +180,7 @@ export default {
       try {
         await this.cartStore.decreaseQty(item);
       } catch (error) {
-        console.error('Lỗi khi giảm số lượng:', error);
+        console.error('Lỗi giảm số lượng:', error);
         this.$emit('error', 'Không thể cập nhật số lượng');
       } finally {
         this.processingItemId = null;
@@ -175,12 +192,14 @@ export default {
       try {
         await this.cartStore.removeItem(item);
       } catch (error) {
-        console.error('Lỗi khi xóa sản phẩm:', error);
+        console.error('Lỗi xóa sản phẩm:', error);
         this.$emit('error', 'Không thể xóa sản phẩm');
       } finally {
         this.processingItemId = null;
       }
     },
+
+    // ✅ thêm từ code 2
     async applyVoucher() {
       try {
         await this.cartStore.applyVoucher();
@@ -189,6 +208,9 @@ export default {
         this.$emit('error', 'Không thể áp dụng mã giảm giá');
       }
     },
+
+    // ✅ checkout vẫn giữ hành vi chính của code 1:
+    // đóng modal + push /checkout, chỉ bổ sung check & emit
     async checkout() {
       try {
         if (!this.cartStore.items.length) {
@@ -196,22 +218,19 @@ export default {
           return;
         }
 
-
-        // Thông báo cho cha nếu cần
+        // có thể để cha bắt event nếu cần
         this.$emit('checkout-success');
 
-        // Đóng modal
-        this.$emit('close');
-        this.cartStore.clearError();
+        // Đóng modal (giống code 1: clearError + emit close)
+        this.close();
 
-        // Chuyển sang trang thanh toán, KHÔNG xóa giỏ
+        // Chuyển hướng sang trang checkout, KHÔNG xóa giỏ
         this.$router.push('/checkout');
       } catch (error) {
         console.error('Lỗi khi thanh toán:', error);
         this.$emit('error', 'Không thể xử lý thanh toán');
       }
     },
-
 
     close() {
       this.cartStore.clearError();
@@ -365,6 +384,7 @@ export default {
 .checkout-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+  background: #ccc;
 }
 
 .cart-modal-close {
@@ -394,6 +414,8 @@ export default {
   border-left: 4px solid #c62828;
   font-size: 14px;
 }
+
+/* ✅ style thêm cho phần voucher + discount */
 
 .voucher-section {
   margin-top: 16px;
@@ -456,5 +478,4 @@ export default {
   font-size: 13px;
   color: #555;
 }
-
 </style>
